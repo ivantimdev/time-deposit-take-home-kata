@@ -8,3 +8,11 @@ __pycache__/
 .idea/
 package-lock.json
 .vscode/
+# private AI orchestration (step prompts are published sanitized under docs/ai/prompts)
+prompts/
+.claude/settings.local.json
+# IDE
+*.iml
+# local env / logs
+.env
+*.log
