@@ -130,4 +130,44 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Mutation testing of domain and application code: ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage -->
+        <profile>
+            <id>mutation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.30.0</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.pitest</groupId>
+                                <artifactId>pitest-junit5-plugin</artifactId>
+                                <version>1.2.3</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <targetClasses>
+                                <param>org.ikigaidigital.*</param>
+                            </targetClasses>
+                            <excludedClasses>
+                                <param>org.ikigaidigital.adapter.*</param>
+                                <param>org.ikigaidigital.config.*</param>
+                                <param>org.ikigaidigital.*Application</param>
+                            </excludedClasses>
+                            <targetTests>
+                                <param>org.ikigaidigital.*Test</param>
+                            </targetTests>
+                            <outputFormats>
+                                <param>HTML</param>
+                                <param>XML</param>
+                            </outputFormats>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
