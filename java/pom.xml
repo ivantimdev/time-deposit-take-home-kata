@@ -112,7 +112,8 @@
                             <exclude>src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java</exclude>
                         </excludes>
                         <googleJavaFormat>
-                            <version>1.37.0</version>
+                            <!-- newest release Spotless accepts on JDK 17, the JDK CI builds with -->
+                            <version>1.28.0</version>
                             <style>GOOGLE</style>
                         </googleJavaFormat>
                         <removeUnusedImports/>
