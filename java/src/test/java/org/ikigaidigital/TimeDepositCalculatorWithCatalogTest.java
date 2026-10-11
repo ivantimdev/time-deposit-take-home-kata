@@ -21,8 +21,7 @@ class TimeDepositCalculatorWithCatalogTest {
           PlanCatalog.of(
               new Plan(
                   PlanType.BASIC,
-                  new FixedRateInterest(
-                      new AnnualRate(0.12), EarningPeriod.between(1, Integer.MAX_VALUE)))));
+                  new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.after(0)))));
 
   @ParameterizedTest(name = "basic {0} at {1} days -> {2}")
   @CsvSource(

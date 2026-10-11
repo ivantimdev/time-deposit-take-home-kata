@@ -57,8 +57,7 @@ class PlanCatalogTest {
         PlanCatalog.of(
             new Plan(
                 PlanType.BASIC,
-                new FixedRateInterest(
-                    new AnnualRate(0.12), EarningPeriod.between(1, Integer.MAX_VALUE))));
+                new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.after(0))));
 
     assertThat(basicOnly.planFor("student")).isEmpty();
   }
@@ -70,9 +69,7 @@ class PlanCatalogTest {
             PlanType.BASIC, new FixedRateInterest(new AnnualRate(0.01), EarningPeriod.after(30)));
     final Plan twelvePercent =
         new Plan(
-            PlanType.BASIC,
-            new FixedRateInterest(
-                new AnnualRate(0.12), EarningPeriod.between(1, Integer.MAX_VALUE)));
+            PlanType.BASIC, new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.after(0)));
 
     assertThatThrownBy(() -> PlanCatalog.of(onePercent, twelvePercent))
         .isInstanceOf(IllegalArgumentException.class);
