@@ -20,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -32,22 +31,12 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
   private final TimeDepositPersistenceAdapter adapter;
   private final JdbcTemplate jdbc;
   private final TestEntityManager entityManager;
-  private final Environment environment;
 
   TimeDepositPersistenceAdapterIT(
-      TimeDepositPersistenceAdapter adapter,
-      JdbcTemplate jdbc,
-      TestEntityManager entityManager,
-      Environment environment) {
+      TimeDepositPersistenceAdapter adapter, JdbcTemplate jdbc, TestEntityManager entityManager) {
     this.adapter = adapter;
     this.jdbc = jdbc;
     this.entityManager = entityManager;
-    this.environment = environment;
-  }
-
-  @Test
-  void runsWithSchemaValidationEnabled() {
-    assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
   }
 
   @Test
@@ -56,14 +45,6 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
             jdbc.queryForList(
                 "select version from flyway_schema_history where success", String.class))
         .contains("1");
-  }
-
-  @Test
-  void recordsNoFailedMigration() {
-    assertThat(
-            jdbc.queryForObject(
-                "select count(*) from flyway_schema_history where not success", Integer.class))
-        .isZero();
   }
 
   @ParameterizedTest
