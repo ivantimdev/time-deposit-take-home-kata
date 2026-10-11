@@ -14,8 +14,9 @@ Run instructions, including how to call both endpoints from Swagger UI, are adde
 
 Test instructions are added to this section with the test suite; the build is checked with `./mvnw verify`.
 
-Node.js is optional: it is used only to lint the OpenAPI contract with Spectral
-(`npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml`).
+Node.js is optional to build, test and run the service. It is used only for the contract lint,
+Spectral run through `npx`, which is part of `/verify` and CI:
+`npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml`.
 The Maven build validates the contract itself: the OpenAPI generator plugin rejects an invalid
 contract and fails the build.
 
