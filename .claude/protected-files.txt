@@ -1,0 +1,4 @@
+# Frozen by the assignment: no breaking changes to the shared class
+java/src/main/java/org/ikigaidigital/TimeDeposit.java
+# The assignment text itself
+docs/ASSIGNMENT.md
