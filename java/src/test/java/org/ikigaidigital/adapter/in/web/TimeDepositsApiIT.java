@@ -233,6 +233,12 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   }
 
   @Test
+  void servesTheContractAsYaml() {
+    assertThat(http.getForEntity("/openapi.yaml", byte[].class).getHeaders().getContentType())
+        .isEqualTo(MediaType.parseMediaType("application/yaml"));
+  }
+
+  @Test
   void servesSwaggerUiPointedAtTheContract() {
     ResponseEntity<String> response = http.getForEntity("/swagger-ui/index.html", String.class);
 
