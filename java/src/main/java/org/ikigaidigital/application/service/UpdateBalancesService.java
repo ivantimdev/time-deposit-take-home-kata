@@ -20,6 +20,8 @@ public class UpdateBalancesService implements UpdateBalancesUseCase {
 
   // ASSUMPTION A2: the use case owns the transaction boundary.
   // ASSUMPTION A10: concurrent updates serialise on the row lock held until this transaction ends.
+  // ASSUMPTION A8: one call posts one month; the month-end scheduler owns the cadence.
+  // ASSUMPTION A22: one transaction for all deposits; see ARCHITECTURE.md › Scaling the update.
   @Transactional
   @Override
   public List<TimeDepositDetails> updateBalances() {

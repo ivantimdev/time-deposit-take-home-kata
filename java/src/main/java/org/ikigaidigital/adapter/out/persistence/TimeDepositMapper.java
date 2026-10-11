@@ -9,6 +9,7 @@ final class TimeDepositMapper {
 
   private TimeDepositMapper() {}
 
+  // ASSUMPTION A21: balances up to 15 significant digits round-trip exactly through the Double.
   static TimeDeposit toDomain(TimeDepositEntity entity) {
     return new TimeDeposit(
         entity.getId(),

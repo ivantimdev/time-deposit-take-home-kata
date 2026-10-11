@@ -8,7 +8,9 @@ info:
   contact:
     name: XA Bank time deposit team
 # ASSUMPTION A1: exactly two operations; this contract and Swagger UI document them and add no endpoint.
-# ASSUMPTION A19: no authentication; a bearer token checked at the gateway or by Spring Security would be added.
+# ASSUMPTION A19: the endpoints are open; the assignment names no users, roles or security. If authentication
+# were required, a bearer token would be validated at the gateway or by Spring Security, and the scheme declared
+# in the contract.
 servers:
   - url: http://localhost:8080
     description: Local run
