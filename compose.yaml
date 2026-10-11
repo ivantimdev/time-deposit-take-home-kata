@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: timedeposit
+      POSTGRES_USER: timedeposit
+      POSTGRES_PASSWORD: timedeposit
+    ports:
+      - "5432:5432"
+    volumes:
+      # Keeps the deposits and their updated balances across restarts;
+      # `docker compose down -v` deletes it, and the next start reloads the sample data.
+      - timedeposit-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "timedeposit", "-d", "timedeposit"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  app:
+    build: ./java
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/timedeposit
+      DB_USER: timedeposit
+      DB_PASSWORD: timedeposit
+      # The local profile loads the sample deposits.
+      SPRING_PROFILES_ACTIVE: local
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  timedeposit-data:
