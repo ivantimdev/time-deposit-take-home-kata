@@ -15,6 +15,3 @@ spring:
     resources:
       # ASSUMPTION A20: the contract is served unchanged at /openapi.yaml, next to Spring's defaults.
       static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,classpath:/openapi/
-
-server:
-  port: 8080

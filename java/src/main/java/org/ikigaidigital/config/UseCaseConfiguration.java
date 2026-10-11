@@ -10,8 +10,8 @@ import org.ikigaidigital.domain.plan.PlanCatalog;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class UseCaseConfiguration {
+@Configuration(proxyBeanMethods = false)
+class UseCaseConfiguration {
 
   @Bean
   TimeDepositCalculator timeDepositCalculator() {
