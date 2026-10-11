@@ -54,7 +54,8 @@ check_contract_operations() {
     return
   fi
   local count
-  # Counts the HTTP methods directly under each path item, whatever the indentation; needs no YAML library.
+  # Counts the HTTP methods directly under each path item, whatever the indentation or key quoting; needs no
+  # YAML library. A path item that is a $ref would hide its operations elsewhere, so it is rejected.
   count=$(python3 - "$CONTRACT" <<'PY'
 import sys
 
@@ -69,25 +70,29 @@ with open(sys.argv[1]) as contract:
         if not line.strip():
             continue
         indent = len(line) - len(line.lstrip())
-        key = line.strip().split(":", 1)[0]
+        key = line.strip().split(":", 1)[0].strip("\"'")
         if indent == 0:
             in_paths = key == "paths"
             path_indent = operation_indent = None
             continue
         if not in_paths:
             continue
-        if path_indent is None and key.startswith("/"):
+        if path_indent is None:
             path_indent = indent
         if indent == path_indent:
             operation_indent = None
             continue
-        if path_indent is not None and indent > path_indent and operation_indent is None:
+        if indent > path_indent and operation_indent is None:
             operation_indent = indent
+        if indent == operation_indent and key == "$ref":
+            print("ref")
+            sys.exit(0)
         if indent == operation_indent and key in methods:
             count += 1
 print(count)
 PY
 )
+  [ "$count" != ref ] || fail contract-operations "$CONTRACT declares a path item by \$ref; operations must be inline"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
