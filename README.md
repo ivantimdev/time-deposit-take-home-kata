@@ -1,12 +1,12 @@
 # Time Deposit Service — XA Bank kata solution
 
-[![CI](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml?query=branch%3Amain)
-
 A Spring Boot / PostgreSQL service exposing two endpoints — update all balances and list all
 deposits — built as a hexagonal refactoring of the original time deposit calculator.
+The calculator keeps its public API and its results, pinned by characterization tests; the
+interest rules live in a plan catalogue, and the API is generated from an OpenAPI contract.
 The assignment is in [docs/ASSIGNMENT.md](docs/ASSIGNMENT.md).
 
-**Status:** in progress.
+[![CI](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml?query=branch%3Amain)
 
 ## How to run
 
@@ -112,19 +112,75 @@ Spectral run through `npx`, which is part of `/verify` and CI:
 The Maven build validates the contract itself: the OpenAPI generator plugin rejects an invalid
 contract and fails the build.
 
+## API
+
+| method | path | purpose |
+|---|---|---|
+| `GET` | `/api/v1/time-deposits` | List all time deposits, each with its withdrawals. |
+| `POST` | `/api/v1/time-deposits/update-balances` | Credit one month of interest to every deposit and return the updated deposits. |
+
+The contract is [java/src/main/resources/openapi/openapi.yaml](java/src/main/resources/openapi/openapi.yaml).
+With the service running, Swagger UI is at `http://localhost:8080/swagger-ui/index.html`
+and the contract at `http://localhost:8080/openapi.yaml`.
+
 ## Architecture
 
-The package layout and dependency rule are described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- Hexagonal: a REST adapter generated from the contract, use cases behind ports, and a JPA adapter for PostgreSQL.
+- The domain (`TimeDeposit`, `TimeDepositCalculator`, the plan catalogue) imports only the JDK; ArchUnit enforces the layering.
+- `TimeDeposit` is unchanged, and `TimeDepositCalculator` keeps its package, no-arg constructor and `updateBalance` signature.
+- A plan is a catalogue entry of a type, a rate and an earning period; the calculator holds no plan rules.
+- A balance update runs in one transaction that locks the deposit rows, so concurrent updates lose no interest.
 
-## AI-assisted development
-
-The AI harness, its rules and which parts were AI-assisted are described in [docs/AI-DEVELOPMENT.md](docs/AI-DEVELOPMENT.md).
+Request flows, money handling and what is out of scope: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Assumptions
 
-Every reading of an ambiguous requirement is recorded in [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md).
+Every reading of an ambiguous requirement is recorded in [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md)
+and cited in the code as `// ASSUMPTION A<n>`.
 
-## Developer setup
+## AI-assisted development
 
-1. Run `scripts/setup-hooks.sh` once after cloning to enable the git hooks.
-2. Build and run all checks with `cd java && ./mvnw verify`.
+The solution was built with Claude Code: one fresh agent per step, each running a written prompt, and no step started before the previous one was verified and approved by the developer.
+The agents work under [AGENTS.md](AGENTS.md), the rules in [.claude/rules/](.claude/rules/), four skills, a hook protecting frozen files, git hooks and [scripts/guardrails.sh](scripts/guardrails.sh); CI runs the same checks.
+Setup and what the harness caught: [docs/AI-DEVELOPMENT.md](docs/AI-DEVELOPMENT.md); prompts: [docs/ai/prompts/](docs/ai/prompts/README.md); step log: [docs/ai/WORKFLOW-LOG.md](docs/ai/WORKFLOW-LOG.md).
+
+## Repository layout
+
+```text
+.
+├── .claude/                 agent rules, skills, protected-files hook, settings
+├── .githooks/               commit-msg and pre-commit hooks
+├── .github/workflows/       CI and image publishing
+├── docs/                    assignment, architecture, assumptions, AI-assisted development
+│   └── ai/                  published agent prompts and the workflow log
+├── java/                    Maven project and Dockerfile
+│   └── src/
+│       ├── main/java/org/ikigaidigital/
+│       │   ├── (root)                    TimeDeposit, TimeDepositCalculator, TimeDepositApplication
+│       │   ├── domain/                   Withdrawal, TimeDepositDetails
+│       │   │   └── plan/                 PlanType, Plan, InterestPolicy, AnnualRate, EarningPeriod, PlanCatalog
+│       │   ├── application/port/in/      use-case interfaces
+│       │   ├── application/port/out/     TimeDepositRepository
+│       │   ├── application/service/      use-case implementations
+│       │   ├── adapter/in/web/           controller and response mapper
+│       │   ├── adapter/out/persistence/  JPA entities, repositories, persistence adapter
+│       │   └── config/                   bean wiring, web configuration
+│       ├── main/resources/  application.yml, openapi/, db/migration/, db/seed/, static/swagger-ui/
+│       └── test/            unit tests (*Test) and integration tests (*IT)
+├── scripts/                 guard rails, banned patterns, protected-file hashes, hook setup
+├── AGENTS.md, CLAUDE.md     agent instructions
+├── compose.yaml             PostgreSQL and the service
+└── .spectral.yaml           contract lint rules
+```
+
+## Development
+
+| task | how |
+|---|---|
+| Enable the git hooks, once after cloning | `scripts/setup-hooks.sh` |
+| Every check before a commit | `/verify` in Claude Code, or the commands in [its skill](.claude/skills/verify/SKILL.md) |
+| Build, unit and integration tests | `cd java && ./mvnw verify` |
+| Mutation testing | `cd java && ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage` |
+| Sanitation dry run | `cd java && ./mvnw -Psanitize rewrite:dryRun` |
+| Guard rails | `scripts/guardrails.sh` |
+| Add a new requirement | `/extend` in Claude Code: restate it, pass a design gate, implement, verify, commit |
