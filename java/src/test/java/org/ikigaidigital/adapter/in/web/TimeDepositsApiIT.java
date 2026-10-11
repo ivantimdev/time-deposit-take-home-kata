@@ -46,7 +46,6 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   private static final Set<String> TIME_DEPOSIT_FIELDS =
       Set.of("id", "planType", "balance", "days", "withdrawals");
   private static final Set<String> WITHDRAWAL_FIELDS = Set.of("id", "amount", "date");
-  private static final int CONCURRENT_UPDATES = 5;
 
   // Keeps every decimal exactly as sent, trailing zeros included, so the scale can be asserted.
   private static final JsonMapper JSON =
@@ -204,13 +203,14 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   // ASSUMPTION A10: concurrent updates are serialised, so none is lost or applied twice.
   @Test
   void appliesEveryConcurrentUpdateExactlyOnce() throws Exception {
+    final int updates = 5;
     insertOneDepositPerPlan();
 
-    List<HttpStatusCode> statuses = updateBalancesConcurrently(CONCURRENT_UPDATES);
+    List<HttpStatusCode> statuses = updateBalancesConcurrently(updates);
 
-    assertThat(statuses).hasSize(CONCURRENT_UPDATES).containsOnly(HttpStatus.OK);
+    assertThat(statuses).hasSize(updates).containsOnly(HttpStatus.OK);
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
-        .isEqualTo(oracleBalances(CONCURRENT_UPDATES));
+        .isEqualTo(oracleBalances(updates));
   }
 
   // Literals from the original calculator (commit 3efc9b5), applied five times.
@@ -278,7 +278,6 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
         "/actuator/health",
         "/v3/api-docs",
         "/webjars/swagger-ui/index.html",
-        "/webjars/swagger-ui/5.33.1/index.html",
         "/webjars/swagger-ui/swagger-initializer.js",
         "/swagger-ui/oauth2-redirect.html"
       })
@@ -329,7 +328,8 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     tables.insertWithdrawal(13, 3, "1000.00", LocalDate.of(2026, 9, 15));
   }
 
-  // The original calculator is the pinned oracle for what one update credits.
+  // The calculator, pinned by the frozen characterization tests, is the oracle for one update;
+  // the sibling tests with literal balances guard against a drift of both.
   private static List<BigDecimal> oracleBalances(int updates) {
     List<TimeDeposit> deposits =
         List.of(
