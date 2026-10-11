@@ -54,9 +54,9 @@ check_contract_operations() {
     return
   fi
   local count
-  # Without a YAML library the count reads only the spellings it can read exactly and rejects every other one,
-  # so that no operation can be hidden from it. A counted line that is not an operation is caught by
-  # TimeDepositsApiTest, which counts the operations with the build's own parser.
+  # Without a YAML library the count accepts only plain block-mapping keys with one-line values and rejects
+  # every other spelling, so that no operation can hide from it. A counted line that is not an operation is
+  # caught by GeneratedApiInterfacesTest, which counts the operations with the build's own parser.
   count=$(python3 - "$CONTRACT" <<'PY'
 import re
 import sys
@@ -64,6 +64,7 @@ import sys
 methods = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
 path_item = re.compile(r"""^(?:"/[^"\\]*"|'/[^'\\]*'|/[^\s"'\\]*):$""")
 operation = re.compile(r"^([a-z][a-z0-9-]*):(.*)$")
+closing = {"[": "]", "{": "}", '"': '"', "'": "'"}
 count = 0
 in_paths = False
 path_indent = None
@@ -75,9 +76,22 @@ def reject():
     sys.exit(0)
 
 
+def without_comment(raw):
+    quote = None
+    for index, char in enumerate(raw):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in {'"', "'"}:
+            quote = char
+        elif char == "#" and (index == 0 or raw[index - 1].isspace()):
+            return raw[:index]
+    return raw
+
+
 with open(sys.argv[1]) as contract:
     for raw in contract:
-        line = raw.split("#", 1)[0].strip()
+        line = without_comment(raw).strip()
         if not line:
             continue
         indent = len(raw) - len(raw.lstrip())
@@ -101,8 +115,9 @@ with open(sys.argv[1]) as contract:
             if not found:
                 reject()
             key, value = found.group(1), found.group(2).strip()
-            quoted = value[:1] in {'"', "'"}
-            if value[:1] in {"[", "{", "&", "*", "!"} or (quoted and not (len(value) > 1 and value.endswith(value[0]))):
+            if value[:1] in {"&", "*", "!"}:
+                reject()
+            if value[:1] in closing and not (len(value) > 1 and value.endswith(closing[value[0]])):
                 reject()
             if key in methods:
                 if value:
@@ -112,7 +127,7 @@ print(count)
 PY
 )
   [ "$count" != unreadable ] ||
-    fail contract-operations "$CONTRACT has a path item or operation the count cannot read; write them as block mappings with /... path keys, lowercase operation keys and one-line values"
+    fail contract-operations "$CONTRACT has a path item or operation the count cannot read; write them as block mappings with /... path keys, lowercase operation keys and one-line values (no anchors, aliases or tags)"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
