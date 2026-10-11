@@ -191,6 +191,7 @@
                                 <recipe>org.ikigaidigital.Sanitize</recipe>
                             </activeRecipes>
                             <failOnDryRunResults>true</failOnDryRunResults>
+                            <failOnInvalidActiveRecipes>true</failOnInvalidActiveRecipes>
                             <exclusions>
                                 <!-- original kata sources stay untouched until each is first rewritten; TimeDeposit.java is never changed -->
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDeposit.java</exclusion>
