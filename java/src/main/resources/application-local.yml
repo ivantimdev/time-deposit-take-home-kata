@@ -1,0 +1,4 @@
+# Sample data for manual exploration; never active in tests or by default.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed

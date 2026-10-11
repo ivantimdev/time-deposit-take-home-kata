@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: time-deposit
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/timedeposit}
+    username: ${DB_USER:timedeposit}
+    password: ${DB_PASSWORD:timedeposit}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+
+server:
+  port: 8080
