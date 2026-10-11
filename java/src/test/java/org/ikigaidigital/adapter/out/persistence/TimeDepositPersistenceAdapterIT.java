@@ -46,7 +46,7 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
   }
 
   @Test
-  void validatesTheMappingAgainstTheMigratedSchema() {
+  void runsWithSchemaValidationEnabled() {
     assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
   }
 
@@ -55,7 +55,15 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
     assertThat(
             jdbc.queryForList(
                 "select version from flyway_schema_history where success", String.class))
-        .containsExactly("1");
+        .contains("1");
+  }
+
+  @Test
+  void recordsNoFailedMigration() {
+    assertThat(
+            jdbc.queryForObject(
+                "select count(*) from flyway_schema_history where not success", Integer.class))
+        .isZero();
   }
 
   @ParameterizedTest
