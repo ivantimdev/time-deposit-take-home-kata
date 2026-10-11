@@ -170,5 +170,37 @@
                 </plugins>
             </build>
         </profile>
+        <!-- Static analysis without formatting: ./mvnw -Psanitize rewrite:dryRun checks, rewrite:run then spotless:apply fixes -->
+        <profile>
+            <id>sanitize</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openrewrite.maven</groupId>
+                        <artifactId>rewrite-maven-plugin</artifactId>
+                        <version>6.46.1</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.openrewrite.recipe</groupId>
+                                <artifactId>rewrite-static-analysis</artifactId>
+                                <version>2.41.1</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <activeRecipes>
+                                <recipe>org.ikigaidigital.Sanitize</recipe>
+                            </activeRecipes>
+                            <failOnDryRunResults>true</failOnDryRunResults>
+                            <exclusions>
+                                <!-- original kata sources: recipes would finalize TimeDeposit fields and change the calculator's rounding -->
+                                <exclusion>**/src/main/java/org/ikigaidigital/TimeDeposit.java</exclusion>
+                                <exclusion>**/src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclusion>
+                                <exclusion>**/src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java</exclusion>
+                            </exclusions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

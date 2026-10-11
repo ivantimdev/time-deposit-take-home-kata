@@ -1,0 +1,14 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.ikigaidigital.Sanitize
+displayName: Remove dead code and static analysis findings
+description: Static analysis only; formatting is owned by Spotless with google-java-format.
+recipeList:
+  - org.openrewrite.java.RemoveUnusedImports
+  - org.openrewrite.staticanalysis.RemoveUnusedLocalVariables
+  - org.openrewrite.staticanalysis.RemoveUnusedPrivateMethods
+  - org.openrewrite.staticanalysis.RemoveUnusedPrivateFields
+  - org.openrewrite.staticanalysis.UnnecessaryParentheses
+  - org.openrewrite.staticanalysis.RemoveExtraSemicolons
+  - org.openrewrite.staticanalysis.RemoveRedundantTypeCast
+  - org.openrewrite.staticanalysis.CommonStaticAnalysis
