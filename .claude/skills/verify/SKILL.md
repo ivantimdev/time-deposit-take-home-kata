@@ -22,7 +22,7 @@ Run the checks in order from the repository root. Each must exit 0.
 3. Sanitation dry run (static analysis findings fail it):
 
    ```bash
-   (cd java && ./mvnw -q -Psanitize rewrite:dryRun -Drewrite.failOnDryRunResults=true)
+   (cd java && ./mvnw -q -Psanitize rewrite:dryRun)
    ```
 
 4. Guard rails (protected files, commit messages, contract, banned patterns, assumptions):

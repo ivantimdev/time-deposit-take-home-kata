@@ -7,6 +7,5 @@
 - Test names state behaviour in domain words, e.g. `creditsNoInterestWithinFirstThirtyDays`.
 - Use parameterized tests for boundaries.
 - Expected values are literals derived from the original implementation, never recomputed with the formula under test.
-- Characterization tests are frozen once committed: a later step may add tests, never edit or delete them. They are protected by hash in `scripts/guardrails.sh`.
-- Frozen characterization tests: `TimeDepositCalculatorTest` and `TimeDepositCalculatorPublicApiTest` in `java/src/test/java/org/ikigaidigital/`.
+- The characterization tests, `TimeDepositCalculatorTest` and `TimeDepositCalculatorPublicApiTest` in `java/src/test/java/org/ikigaidigital/`, are frozen: a later step may add tests, never edit or delete them; `scripts/guardrails.sh` protects them by hash.
 - AssertJ for assertions; one behaviour per test; no logic in tests.
