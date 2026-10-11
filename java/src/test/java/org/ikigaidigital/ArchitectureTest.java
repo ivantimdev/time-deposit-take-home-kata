@@ -1,9 +1,11 @@
 package org.ikigaidigital;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.belongToAnyOf;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.implement;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMembers;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
@@ -15,6 +17,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.CompositeArchRule;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 class ArchitectureTest {
 
@@ -146,6 +149,21 @@ class ArchitectureTest {
                 .or(
                     resideInAPackage("org.ikigaidigital")
                         .and(DescribedPredicate.not(ROOT_DOMAIN_CLASSES))))
+        .check(PRODUCTION_CLASSES);
+  }
+
+  // ASSUMPTION A2: each use case runs in the transaction its service declares.
+  @Test
+  void useCaseServicesAreTransactional() {
+    methods()
+        .that()
+        .arePublic()
+        .and()
+        .areDeclaredInClassesThat(
+            resideInAPackage("org.ikigaidigital.application.service..")
+                .and(implement(resideInAPackage("org.ikigaidigital.application.port.in.."))))
+        .should()
+        .beAnnotatedWith(Transactional.class)
         .check(PRODUCTION_CLASSES);
   }
 }

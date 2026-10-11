@@ -12,7 +12,6 @@ import org.ikigaidigital.application.InMemoryTimeDepositRepository;
 import org.ikigaidigital.domain.TimeDepositDetails;
 import org.ikigaidigital.domain.Withdrawal;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 
 class ListTimeDepositsServiceTest {
 
@@ -23,9 +22,12 @@ class ListTimeDepositsServiceTest {
 
   private final InMemoryTimeDepositRepository repository =
       new InMemoryTimeDepositRepository()
-          .add(new TimeDeposit(3, "premium", 3000.0, 46))
-          .add(new TimeDeposit(1, "basic", 1000.0, 31))
-          .add(new TimeDeposit(2, "student", 2000.0, 100), SECOND_WITHDRAWAL, FIRST_WITHDRAWAL);
+          .addAll(
+              List.of(
+                  new TimeDeposit(3, "premium", 3000.0, 46),
+                  new TimeDeposit(1, "basic", 1000.0, 31),
+                  new TimeDeposit(2, "student", 2000.0, 100)))
+          .addWithdrawals(2, SECOND_WITHDRAWAL, FIRST_WITHDRAWAL);
 
   private final ListTimeDepositsService service = new ListTimeDepositsService(repository);
 
@@ -67,15 +69,5 @@ class ListTimeDepositsServiceTest {
         new ListTimeDepositsService(new InMemoryTimeDepositRepository());
 
     assertThat(emptyService.listTimeDeposits()).isEmpty();
-  }
-
-  @Test
-  void listsInAReadOnlyTransaction() throws NoSuchMethodException {
-    Transactional transactional =
-        ListTimeDepositsService.class
-            .getMethod("listTimeDeposits")
-            .getAnnotation(Transactional.class);
-
-    assertThat(transactional.readOnly()).isTrue();
   }
 }

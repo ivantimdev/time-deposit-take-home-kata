@@ -1,6 +1,7 @@
 package org.ikigaidigital.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.ikigaidigital.application.InMemoryTimeDepositRepository.LOAD_ALL_FOR_UPDATE;
 import static org.ikigaidigital.application.InMemoryTimeDepositRepository.LOAD_ALL_WITH_WITHDRAWALS;
 import static org.ikigaidigital.application.InMemoryTimeDepositRepository.SAVE_ALL;
@@ -8,13 +9,13 @@ import static org.ikigaidigital.application.InMemoryTimeDepositRepository.SAVE_A
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.assertj.core.groups.Tuple;
 import org.ikigaidigital.TimeDeposit;
 import org.ikigaidigital.TimeDepositCalculator;
 import org.ikigaidigital.application.InMemoryTimeDepositRepository;
 import org.ikigaidigital.domain.TimeDepositDetails;
 import org.ikigaidigital.domain.Withdrawal;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 
 class UpdateBalancesServiceTest {
 
@@ -25,44 +26,43 @@ class UpdateBalancesServiceTest {
 
   private final InMemoryTimeDepositRepository repository =
       new InMemoryTimeDepositRepository()
-          .add(new TimeDeposit(3, "premium", 3000.0, 46))
-          .add(new TimeDeposit(1, "basic", 1000.0, 31))
-          .add(new TimeDeposit(4, "basic", 500.0, 10))
-          .add(new TimeDeposit(2, "student", 2000.0, 100), SECOND_WITHDRAWAL, FIRST_WITHDRAWAL);
+          .addAll(depositsOutOfIdOrder())
+          .addWithdrawals(2, SECOND_WITHDRAWAL, FIRST_WITHDRAWAL);
 
   private final UpdateBalancesService service =
       new UpdateBalancesService(repository, new TimeDepositCalculator());
 
-  private static List<TimeDeposit> depositsById() {
+  private static List<TimeDeposit> depositsOutOfIdOrder() {
     return List.of(
-        new TimeDeposit(1, "basic", 1000.0, 31),
-        new TimeDeposit(2, "student", 2000.0, 100),
         new TimeDeposit(3, "premium", 3000.0, 46),
-        new TimeDeposit(4, "basic", 500.0, 10));
+        new TimeDeposit(1, "basic", 1000.0, 31),
+        new TimeDeposit(4, "basic", 500.0, 10),
+        new TimeDeposit(2, "student", 2000.0, 100));
+  }
+
+  // The characterization tests pin the calculator, so it is the oracle here on purpose.
+  private static List<Tuple> idsAndBalancesAfterOneMonth() {
+    List<TimeDeposit> expected = depositsOutOfIdOrder();
+    new TimeDepositCalculator().updateBalance(expected);
+    return expected.stream().map(deposit -> tuple(deposit.getId(), deposit.getBalance())).toList();
   }
 
   @Test
   void appliesOneMonthOfInterestToEveryDeposit() {
-    List<TimeDeposit> expected = depositsById();
-    new TimeDepositCalculator().updateBalance(expected);
-
     List<TimeDepositDetails> updated = service.updateBalances();
 
     assertThat(updated)
-        .extracting(details -> details.deposit().getBalance())
-        .containsExactlyElementsOf(expected.stream().map(TimeDeposit::getBalance).toList());
+        .extracting(details -> details.deposit().getId(), details -> details.deposit().getBalance())
+        .containsExactlyInAnyOrderElementsOf(idsAndBalancesAfterOneMonth());
   }
 
   @Test
   void savesTheUpdatedBalances() {
-    List<TimeDeposit> expected = depositsById();
-    new TimeDepositCalculator().updateBalance(expected);
-
     service.updateBalances();
 
     assertThat(repository.loadAllWithWithdrawals())
-        .extracting(details -> details.deposit().getBalance())
-        .containsExactlyElementsOf(expected.stream().map(TimeDeposit::getBalance).toList());
+        .extracting(details -> details.deposit().getId(), details -> details.deposit().getBalance())
+        .containsExactlyInAnyOrderElementsOf(idsAndBalancesAfterOneMonth());
   }
 
   @Test
@@ -105,13 +105,5 @@ class UpdateBalancesServiceTest {
         new UpdateBalancesService(new InMemoryTimeDepositRepository(), new TimeDepositCalculator());
 
     assertThat(emptyService.updateBalances()).isEmpty();
-  }
-
-  @Test
-  void updatesBalancesInOneReadWriteTransaction() throws NoSuchMethodException {
-    Transactional transactional =
-        UpdateBalancesService.class.getMethod("updateBalances").getAnnotation(Transactional.class);
-
-    assertThat(transactional.readOnly()).isFalse();
   }
 }

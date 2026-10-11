@@ -1,7 +1,6 @@
 package org.ikigaidigital.application;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,10 +21,14 @@ public class InMemoryTimeDepositRepository implements TimeDepositRepository {
   private final List<TimeDeposit> loadedForUpdate = new ArrayList<>();
   private final List<TimeDeposit> saved = new ArrayList<>();
 
-  public InMemoryTimeDepositRepository add(
-      TimeDeposit deposit, Withdrawal... withdrawalsOfDeposit) {
-    deposits.put(deposit.getId(), copyOf(deposit));
-    withdrawals.put(deposit.getId(), Arrays.asList(withdrawalsOfDeposit));
+  public InMemoryTimeDepositRepository addAll(List<TimeDeposit> depositsToAdd) {
+    depositsToAdd.forEach(deposit -> deposits.put(deposit.getId(), copyOf(deposit)));
+    return this;
+  }
+
+  public InMemoryTimeDepositRepository addWithdrawals(
+      int timeDepositId, Withdrawal... withdrawalsOfDeposit) {
+    withdrawals.put(timeDepositId, List.of(withdrawalsOfDeposit));
     return this;
   }
 
@@ -40,15 +43,24 @@ public class InMemoryTimeDepositRepository implements TimeDepositRepository {
   @Override
   public void saveAll(List<TimeDeposit> depositsToSave) {
     calls.add(SAVE_ALL);
-    saved.addAll(depositsToSave);
-    depositsToSave.forEach(deposit -> deposits.put(deposit.getId(), copyOf(deposit)));
+    for (TimeDeposit deposit : depositsToSave) {
+      if (loadedForUpdate.stream().noneMatch(loaded -> loaded.getId() == deposit.getId())) {
+        throw new IllegalStateException(
+            "saving a deposit that was not loaded: id " + deposit.getId());
+      }
+      saved.add(deposit);
+      deposits.put(deposit.getId(), copyOf(deposit));
+    }
   }
 
   @Override
   public List<TimeDepositDetails> loadAllWithWithdrawals() {
     calls.add(LOAD_ALL_WITH_WITHDRAWALS);
     return deposits.values().stream()
-        .map(deposit -> new TimeDepositDetails(copyOf(deposit), withdrawals.get(deposit.getId())))
+        .map(
+            deposit ->
+                new TimeDepositDetails(
+                    copyOf(deposit), withdrawals.getOrDefault(deposit.getId(), List.of())))
         .toList();
   }
 
