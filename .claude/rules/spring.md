@@ -5,6 +5,7 @@
 - No stereotype annotations in `domain`/`application`; beans for use cases, the calculator and ports are declared in `config` `@Configuration` classes.
 - Controllers are thin: map request → call one use case → map response. No logic.
 - Controllers implement the interface generated from the OpenAPI contract; hand-written `@RequestMapping`/`@GetMapping`/… annotations are not allowed in `src/main`.
+- A new operation starts as a change to `openapi.yaml`; the contract has exactly two operations (`scripts/guardrails.sh` enforces it).
 - Configuration is externalised in `application.yml`; profile `local` adds seed data and local DB settings.
 - Tests use Testcontainers, never H2 or an embedded database.
 - Flyway owns the schema; `spring.jpa.hibernate.ddl-auto=validate`.

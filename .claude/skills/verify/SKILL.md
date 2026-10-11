@@ -13,13 +13,19 @@ Run the checks in order from the repository root. Each must exit 0.
    (cd java && ./mvnw -q spotless:check verify)
    ```
 
-2. Sanitation dry run (static analysis findings fail it):
+2. Contract lint (Spectral via `npx`, Node ≥ 18; any error or warning fails it):
+
+   ```bash
+   npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml
+   ```
+
+3. Sanitation dry run (static analysis findings fail it):
 
    ```bash
    (cd java && ./mvnw -q -Psanitize rewrite:dryRun -Drewrite.failOnDryRunResults=true)
    ```
 
-3. Guard rails (protected files, commit messages, contract, banned patterns, assumptions):
+4. Guard rails (protected files, commit messages, contract, banned patterns, assumptions):
 
    ```bash
    scripts/guardrails.sh
