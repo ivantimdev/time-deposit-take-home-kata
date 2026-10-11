@@ -54,7 +54,7 @@ Dependency rule: `adapter.*` → `application` → `domain`; `config` → everyt
 
 ## 6. Definition of done
 
-A task, step or live-session change is finished only when all of the following hold at `HEAD`:
+A task, step or later change is finished only when all of the following hold at `HEAD`:
 
 - every planned commit exists and each was committed only after a green `./mvnw -q verify`, so every commit in history builds and passes;
 - `/verify` is fully green: Spotless check, build, unit and integration tests, sanitation dry run, `scripts/guardrails.sh`;

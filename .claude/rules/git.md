@@ -75,7 +75,7 @@ Invalid:
     chore(Repo): Remove unused starters.     # uppercase scope, capitalised summary, trailing period
     feat(api): added endpoints               # not imperative
     fix(domain): fix bug                     # summary says nothing
-    feat(domain): add internal plan and refactor calculator and update README   # not atomic
+    feat(domain): add new rule and refactor calculator and update README   # not atomic
 
 ## Checklist before committing
 

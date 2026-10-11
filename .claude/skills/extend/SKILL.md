@@ -5,7 +5,7 @@ description: Add a new business requirement safely - restate it, check constrain
 
 # Extend
 
-Use for every new requirement, including those raised in a live session.
+Use for every new requirement, including a later requirement or a future change.
 
 1. **Restate** the requirement as one business rule in the vocabulary of `docs/ASSIGNMENT.md` (`planType`, `days`, `balance`, `withdrawals`). Name its rule family: interest, lifecycle, persistence or API.
 2. **Constraints** — list which hard constraints in `AGENTS.md` it touches and how they stay intact.
