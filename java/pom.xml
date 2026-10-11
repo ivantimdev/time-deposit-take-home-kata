@@ -152,6 +152,8 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
+                    <!-- the repackaged jar nests classes under BOOT-INF; test against the plain classes -->
+                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>

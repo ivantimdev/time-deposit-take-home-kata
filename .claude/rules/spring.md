@@ -1,6 +1,7 @@
 # Spring rules
 
 - Constructor injection only; no `@Autowired` anywhere; no field or setter injection.
+- Spring tests take collaborators through their constructor too (`spring.test.constructor.autowire.mode=all` in `src/test/resources/junit-platform.properties`).
 - No stereotype annotations in `domain`/`application`; beans for use cases, the calculator and ports are declared in `config` `@Configuration` classes.
 - Controllers are thin: map request → call one use case → map response. No logic.
 - Controllers implement the interface generated from the OpenAPI contract; hand-written `@RequestMapping`/`@GetMapping`/… annotations are not allowed in `src/main`.
