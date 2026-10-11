@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.cfg.JsonNodeFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,8 +21,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import org.ikigaidigital.PostgresContainerSupport;
-import org.ikigaidigital.TimeDeposit;
-import org.ikigaidigital.TimeDepositCalculator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,24 +113,18 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
         .allSatisfy(withdrawal -> assertThat(fieldNames(withdrawal)).isEqualTo(WITHDRAWAL_FIELDS));
   }
 
+  // Literals from the original calculator (commit 3efc9b5), applied once.
   @Test
-  void updatesBalancesAsTheCalculatorDoes() {
+  void creditsOneMonthOfInterestToEveryDeposit() {
     insertOneDepositPerPlan();
 
     ResponseEntity<String> response = http.postForEntity(UPDATE_BALANCES, null, String.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-    assertThat(balances(json(response.getBody()))).isEqualTo(oracleBalances(1));
-  }
-
-  @Test
-  void creditsOneMonthOfBasicInterestToTheBasicDeposit() {
-    insertOneDepositPerPlan();
-
-    JsonNode deposits = json(http.postForEntity(UPDATE_BALANCES, null, String.class).getBody());
-
-    assertThat(deposits.get(0).get("balance").decimalValue()).isEqualTo(new BigDecimal("10008.33"));
+    assertThat(balances(json(response.getBody())))
+        .containsExactly(
+            new BigDecimal("10008.33"), new BigDecimal("5012.50"), new BigDecimal("20083.33"));
   }
 
   @Test
@@ -156,20 +147,9 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     assertThat(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())).isEqualTo(updated);
   }
 
-  @Test
-  void compoundsInterestOverThreeUpdates() {
-    insertOneDepositPerPlan();
-
-    http.postForEntity(UPDATE_BALANCES, null, String.class);
-    http.postForEntity(UPDATE_BALANCES, null, String.class);
-    JsonNode deposits = json(http.postForEntity(UPDATE_BALANCES, null, String.class).getBody());
-
-    assertThat(balances(deposits)).isEqualTo(oracleBalances(3));
-  }
-
   // Literals from the original calculator (commit 3efc9b5), applied three times.
   @Test
-  void reachesTheOriginalBalancesAfterThreeUpdates() {
+  void compoundsInterestOverThreeUpdates() {
     insertOneDepositPerPlan();
 
     http.postForEntity(UPDATE_BALANCES, null, String.class);
@@ -201,25 +181,14 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   }
 
   // ASSUMPTION A10: concurrent updates are serialised, so none is lost or applied twice.
-  @Test
-  void appliesEveryConcurrentUpdateExactlyOnce() throws Exception {
-    final int updates = 5;
-    insertOneDepositPerPlan();
-
-    List<HttpStatusCode> statuses = updateBalancesConcurrently(updates);
-
-    assertThat(statuses).hasSize(updates).containsOnly(HttpStatus.OK);
-    assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
-        .isEqualTo(oracleBalances(updates));
-  }
-
   // Literals from the original calculator (commit 3efc9b5), applied five times.
   @Test
-  void reachesTheOriginalBalancesAfterFiveConcurrentUpdates() throws Exception {
+  void appliesEveryConcurrentUpdateExactlyOnce() throws Exception {
     insertOneDepositPerPlan();
 
-    updateBalancesConcurrently(5);
+    List<HttpStatusCode> statuses = updateBalancesConcurrently(5);
 
+    assertThat(statuses).hasSize(5).containsOnly(HttpStatus.OK);
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
         .containsExactly(
             new BigDecimal("10041.73"), new BigDecimal("5062.81"), new BigDecimal("20420.15"));
@@ -326,21 +295,6 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     tables.insertWithdrawal(12, 1, "500.00", LocalDate.of(2026, 7, 15));
     tables.insertWithdrawal(11, 1, "250.00", LocalDate.of(2026, 8, 1));
     tables.insertWithdrawal(13, 3, "1000.00", LocalDate.of(2026, 9, 15));
-  }
-
-  // The calculator, pinned by the frozen characterization tests, is the oracle for one update;
-  // the sibling tests with literal balances guard against a drift of both.
-  private static List<BigDecimal> oracleBalances(int updates) {
-    List<TimeDeposit> deposits =
-        List.of(
-            new TimeDeposit(1, "basic", 10000.00, 45),
-            new TimeDeposit(2, "student", 5000.00, 100),
-            new TimeDeposit(3, "premium", 20000.00, 60));
-    TimeDepositCalculator calculator = new TimeDepositCalculator();
-    IntStream.range(0, updates).forEach(update -> calculator.updateBalance(deposits));
-    return deposits.stream()
-        .map(deposit -> BigDecimal.valueOf(deposit.getBalance()).setScale(2, RoundingMode.HALF_UP))
-        .toList();
   }
 
   private static void assertDeposit(
