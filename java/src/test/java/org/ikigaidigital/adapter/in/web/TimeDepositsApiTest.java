@@ -2,18 +2,21 @@ package org.ikigaidigital.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.lang.reflect.Method;
-import org.ikigaidigital.adapter.in.web.api.TimeDepositsApi;
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaMethod;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import org.junit.jupiter.api.Test;
 
-// ASSUMPTION A1: the generated interface, parsed from the contract by the build, declares one
-// method per operation; this is the exact count behind the guard rail's line-based one.
+// ASSUMPTION A1: the build generates one interface per contract tag, each with one method per
+// operation; together they give the exact count that the guard rail's line-based one cannot.
 class TimeDepositsApiTest {
 
   @Test
-  void contractDeclaresExactlyTheTwoOperations() {
-    assertThat(TimeDepositsApi.class.getMethods())
-        .extracting(Method::getName)
+  void generatedInterfacesDeclareExactlyTheTwoOperations() {
+    assertThat(new ClassFileImporter().importPackages("org.ikigaidigital.adapter.in.web.api"))
+        .filteredOn(JavaClass::isInterface)
+        .flatExtracting(JavaClass::getMethods)
+        .extracting(JavaMethod::getName)
         .containsExactlyInAnyOrder("listTimeDeposits", "updateBalances");
   }
 }
