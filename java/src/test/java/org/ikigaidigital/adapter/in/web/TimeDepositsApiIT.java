@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,8 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -50,7 +47,6 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
       Set.of("id", "planType", "balance", "days", "withdrawals");
   private static final Set<String> WITHDRAWAL_FIELDS = Set.of("id", "amount", "date");
   private static final int CONCURRENT_UPDATES = 5;
-  private static final Logger LOG = LoggerFactory.getLogger(TimeDepositsApiIT.class);
 
   // Keeps every decimal exactly as sent, trailing zeros included, so the scale can be asserted.
   private static final JsonMapper JSON =
@@ -210,7 +206,7 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   void appliesEveryConcurrentUpdateExactlyOnce() throws Exception {
     insertOneDepositPerPlan();
 
-    List<HttpStatusCode> statuses = updateBalancesConcurrently();
+    List<HttpStatusCode> statuses = updateBalancesConcurrently(CONCURRENT_UPDATES);
 
     assertThat(statuses).hasSize(CONCURRENT_UPDATES).containsOnly(HttpStatus.OK);
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
@@ -222,7 +218,7 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   void reachesTheOriginalBalancesAfterFiveConcurrentUpdates() throws Exception {
     insertOneDepositPerPlan();
 
-    updateBalancesConcurrently();
+    updateBalancesConcurrently(5);
 
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
         .containsExactly(
@@ -282,6 +278,7 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
         "/actuator/health",
         "/v3/api-docs",
         "/webjars/swagger-ui/index.html",
+        "/webjars/swagger-ui/5.33.1/index.html",
         "/webjars/swagger-ui/swagger-initializer.js",
         "/swagger-ui/oauth2-redirect.html"
       })
@@ -298,12 +295,12 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
         .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  private List<HttpStatusCode> updateBalancesConcurrently() throws Exception {
+  private List<HttpStatusCode> updateBalancesConcurrently(int updates) throws Exception {
     CountDownLatch start = new CountDownLatch(1);
-    ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_UPDATES);
+    ExecutorService executor = Executors.newFixedThreadPool(updates);
     try {
       List<Future<ResponseEntity<String>>> responses =
-          IntStream.range(0, CONCURRENT_UPDATES)
+          IntStream.range(0, updates)
               .mapToObj(
                   update ->
                       executor.submit(
@@ -312,16 +309,11 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
                             return http.postForEntity(UPDATE_BALANCES, null, String.class);
                           }))
               .toList();
-      long started = System.nanoTime();
       start.countDown();
       List<HttpStatusCode> statuses = new ArrayList<>();
       for (Future<ResponseEntity<String>> response : responses) {
         statuses.add(response.get(30, TimeUnit.SECONDS).getStatusCode());
       }
-      LOG.info(
-          "{} concurrent balance updates took {} ms",
-          CONCURRENT_UPDATES,
-          Duration.ofNanos(System.nanoTime() - started).toMillis());
       return statuses;
     } finally {
       executor.shutdownNow();
