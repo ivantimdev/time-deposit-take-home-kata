@@ -3,29 +3,29 @@ package org.ikigaidigital.adapter.in.web;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import org.ikigaidigital.adapter.in.web.model.TimeDeposit;
-import org.ikigaidigital.adapter.in.web.model.Withdrawal;
+import org.ikigaidigital.adapter.in.web.model.TimeDepositResponse;
+import org.ikigaidigital.adapter.in.web.model.WithdrawalResponse;
 import org.ikigaidigital.domain.TimeDepositDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 class TimeDepositResponseMapper {
 
-  List<TimeDeposit> toResponse(List<TimeDepositDetails> deposits) {
+  List<TimeDepositResponse> toResponse(List<TimeDepositDetails> deposits) {
     return deposits.stream().map(TimeDepositResponseMapper::toResponse).toList();
   }
 
-  private static TimeDeposit toResponse(TimeDepositDetails details) {
+  private static TimeDepositResponse toResponse(TimeDepositDetails details) {
     var deposit = details.deposit();
-    return new TimeDeposit(
+    return new TimeDepositResponse(
         deposit.getId(),
-        TimeDeposit.PlanTypeEnum.fromValue(deposit.getPlanType()),
+        TimeDepositResponse.PlanTypeEnum.fromValue(deposit.getPlanType()),
         toAmount(deposit.getBalance()),
         deposit.getDays(),
         details.withdrawals().stream()
             .map(
                 withdrawal ->
-                    new Withdrawal(withdrawal.id(), withdrawal.amount(), withdrawal.date()))
+                    new WithdrawalResponse(withdrawal.id(), withdrawal.amount(), withdrawal.date()))
             .toList());
   }
 

@@ -115,6 +115,8 @@
                             <output>${project.build.directory}/generated-sources/openapi</output>
                             <apiPackage>org.ikigaidigital.adapter.in.web.api</apiPackage>
                             <modelPackage>org.ikigaidigital.adapter.in.web.model</modelPackage>
+                            <!-- the response models must not share a name with the domain's TimeDeposit and Withdrawal -->
+                            <modelNameSuffix>Response</modelNameSuffix>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <generateApiDocumentation>false</generateApiDocumentation>
