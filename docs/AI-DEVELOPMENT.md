@@ -6,8 +6,6 @@ Every file named here is in the repository.
 ## Tools and setup
 
 - **Claude Code** 2.1.287, run in the terminal at the repository root, for every step.
-- **Models**, as the developer states them: "Fable 5.1 for design; Opus 5.5 for coding implementation".
-  The design session ran with Fable 5.1 in the Claude app; the orchestrator, the step agents and the review agents of steps 1 to 8 ran with Opus 5.5 in Claude Code; the final review and its fixes (step 9) ran with Fable 5.1 in Claude Code.
 - **Repository harness**, loaded by Claude Code from the repository itself:
 
 | file | role |
@@ -30,7 +28,7 @@ The orchestrator, a separate agent, then re-ran every check itself instead of tr
 The developer read the gate summary and the diff, decided on each finding, and either sent the step back for a fix round or approved it.
 The branch was pushed after the developer's approval, given per step or in advance for a fix round; in step 7 the step agent pushed itself, because CI had to run.
 Step 0, the harness itself, ran before the orchestrator existed and was approved commit by commit.
-[`docs/ai/WORKFLOW-LOG.md`](ai/WORKFLOW-LOG.md) lists every step's commits, gate outcome and fix rounds.
+[`docs/ai/WORKFLOW-LOG.md`](ai/WORKFLOW-LOG.md) records what each step built, its gate outcome, review findings and fix rounds.
 
 ```mermaid
 sequenceDiagram
