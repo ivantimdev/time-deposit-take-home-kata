@@ -8,10 +8,6 @@ public record EarningPeriod(int firstDay, int lastDay) {
     }
   }
 
-  public static EarningPeriod from(int day) {
-    return new EarningPeriod(day, Integer.MAX_VALUE);
-  }
-
   public static EarningPeriod after(int day) {
     if (day == Integer.MAX_VALUE) {
       throw new IllegalArgumentException("no day follows day " + day);

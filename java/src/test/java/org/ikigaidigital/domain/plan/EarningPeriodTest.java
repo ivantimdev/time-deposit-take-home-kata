@@ -21,12 +21,6 @@ class EarningPeriodTest {
     assertThat(EarningPeriod.between(31, 365).includes(days)).isEqualTo(included);
   }
 
-  @ParameterizedTest(name = "day {0} -> {1}")
-  @CsvSource({"-1, false", "0, false", "1, true", "2147483647, true"})
-  void periodFromDayOneIncludesDayOne(int days, boolean included) {
-    assertThat(EarningPeriod.from(1).includes(days)).isEqualTo(included);
-  }
-
   @Test
   void periodAfterTheLargestDayIsRejected() {
     assertThatThrownBy(() -> EarningPeriod.after(Integer.MAX_VALUE))
