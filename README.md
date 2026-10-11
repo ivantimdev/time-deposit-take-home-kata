@@ -106,7 +106,7 @@ Repository guard rails (protected files, commit messages, the two API operations
 scripts/guardrails.sh
 ```
 
-Node.js (18 or later; CI runs it on 22) is optional to build, test and run the service. It is used only for the contract lint,
+Node.js (22 or later, which Spectral 6.17 needs; CI runs 22) is optional to build, test and run the service. It is used only for the contract lint,
 Spectral run through `npx`, which is part of `/verify` and CI:
 `npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml`.
 The Maven build validates the contract itself: the OpenAPI generator plugin rejects an invalid
