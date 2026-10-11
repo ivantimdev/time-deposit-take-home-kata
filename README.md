@@ -24,6 +24,8 @@ You need Docker with Docker Compose. Nothing else.
    then replace `build: ./java` with the commented `image:` and `platform:` lines in
    `compose.yaml` and run `docker compose up`.
    The image is built for `linux/amd64` only; on Apple Silicon Docker runs it under emulation.
+   While the package on GitHub is private, the pull needs `docker login ghcr.io` first,
+   as a GitHub user with access to the package.
    The service is ready when the log shows `Started TimeDepositApplication`.
    It listens on `http://localhost:8080`.
    It runs with the `local` profile, which loads four sample deposits.
