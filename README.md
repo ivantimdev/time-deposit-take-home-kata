@@ -1,5 +1,7 @@
 # Time Deposit Service — XA Bank kata solution
 
+[![CI](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml?query=branch%3Amain)
+
 A Spring Boot / PostgreSQL service exposing two endpoints — update all balances and list all
 deposits — built as a hexagonal refactoring of the original time deposit calculator.
 The assignment is in [docs/ASSIGNMENT.md](docs/ASSIGNMENT.md).
@@ -17,6 +19,11 @@ You need Docker with Docker Compose. Nothing else.
    ```
 
    The first build downloads the Maven dependencies and takes a few minutes.
+   To skip the build, use the image CI publishes for every release instead:
+   `docker pull --platform linux/amd64 ghcr.io/ivantimdev/time-deposit-kata:latest`,
+   then replace `build: ./java` with the commented `image:` and `platform:` lines in
+   `compose.yaml` and run `docker compose up`.
+   The image is built for `linux/amd64` only; on Apple Silicon Docker runs it under emulation.
    The service is ready when the log shows `Started TimeDepositApplication`.
    It listens on `http://localhost:8080`.
    It runs with the `local` profile, which loads four sample deposits.
