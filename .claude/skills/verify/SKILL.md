@@ -13,7 +13,7 @@ Run the checks in order from the repository root. Each must exit 0.
    (cd java && ./mvnw -q spotless:check verify)
    ```
 
-2. Contract lint (Spectral 6.17 via `npx`, which needs Node 22 or later, the release CI runs; any error or warning fails it):
+2. Contract lint (Spectral 6 via `npx`; its current releases need Node 22 or later, and CI runs 22; any error or warning fails it):
 
    ```bash
    npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml
