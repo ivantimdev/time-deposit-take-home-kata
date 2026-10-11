@@ -54,21 +54,38 @@ check_contract_operations() {
     return
   fi
   local count
+  # Counts the HTTP methods directly under each path item, whatever the indentation; needs no YAML library.
   count=$(python3 - "$CONTRACT" <<'PY'
-import re
 import sys
 
-path = sys.argv[1]
 methods = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
-try:
-    import yaml
-
-    with open(path) as contract:
-        paths = yaml.safe_load(contract).get("paths") or {}
-    print(sum(1 for item in paths.values() for key in item if key in methods))
-except ImportError:
-    with open(path) as contract:
-        print(sum(1 for line in contract if re.match(r"^\s{4}(get|post|put|patch|delete|head|options):", line)))
+count = 0
+in_paths = False
+path_indent = None
+operation_indent = None
+with open(sys.argv[1]) as contract:
+    for raw in contract:
+        line = raw.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip())
+        key = line.strip().split(":", 1)[0]
+        if indent == 0:
+            in_paths = key == "paths"
+            path_indent = operation_indent = None
+            continue
+        if not in_paths:
+            continue
+        if path_indent is None and key.startswith("/"):
+            path_indent = indent
+        if indent == path_indent:
+            operation_indent = None
+            continue
+        if path_indent is not None and indent > path_indent and operation_indent is None:
+            operation_indent = indent
+        if indent == operation_indent and key in methods:
+            count += 1
+print(count)
 PY
 )
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
@@ -77,27 +94,18 @@ PY
 
 check_mapping_annotations() {
   local hits
-  hits=$(grep -rnE '@(Get|Post|Put|Patch|Delete|Request)Mapping' java/src/main/java || true)
+  # Also matches the fully qualified form, @org.springframework.web.bind.annotation.GetMapping.
+  hits=$(grep -rnE '@([A-Za-z0-9_.]+\.)?(Get|Post|Put|Patch|Delete|Request)Mapping' java/src/main/java || true)
   [ -z "$hits" ] || fail mapping-annotations "hand-written mapping annotation: $(echo "$hits" | head -1)"
   pass mapping-annotations
 }
 
 # A pattern prefixed with "icase:" is matched case-insensitively.
-# A pattern prefixed with "in:<directory> " is matched only in the .java files under that directory;
-# "in:" comes before "icase:" when both are used.
 check_banned_patterns() {
-  local excluded pattern flags scope file hit
+  local excluded pattern flags file hit
   excluded=$(entries scripts/guardrails-exclude.txt)
   while IFS= read -r pattern; do
     flags=-nE
-    scope=java/src
-    case "$pattern" in
-      in:*)
-        scope=${pattern%% *}
-        scope=${scope#in:}
-        pattern=${pattern#* }
-        ;;
-    esac
     case "$pattern" in
       icase:*) pattern=${pattern#icase:} flags=-niE ;;
     esac
@@ -105,7 +113,7 @@ check_banned_patterns() {
       echo "$excluded" | grep -qxF "$file" && continue
       hit=$(grep $flags -e "$pattern" "$file" | head -1 || true)
       [ -z "$hit" ] || fail banned-patterns "$file:$hit (pattern: $pattern)"
-    done < <(find "$scope" -name '*.java' -type f 2>/dev/null | sort)
+    done < <(find java/src -name '*.java' -type f | sort)
   done < <(entries scripts/banned-patterns.txt)
   pass banned-patterns
 }

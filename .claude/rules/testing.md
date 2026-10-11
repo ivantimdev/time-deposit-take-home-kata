@@ -1,7 +1,7 @@
 # Testing rules
 
 - Pyramid: characterization tests of the original calculator (pure JUnit, no Spring) → domain unit tests → application tests with in-memory fakes → `@DataJpaTest` + Testcontainers for the persistence adapter → `@SpringBootTest` + Testcontainers for the endpoints → ArchUnit → mutation testing for `domain` + `application`.
-- No Mockito in domain or application tests.
+- No Mockito anywhere: domain and application tests use in-memory fakes, adapter tests run against a real container.
 - Anything that touches PostgreSQL or HTTP runs against a real PostgreSQL container (Testcontainers, singleton container reused across classes). Never H2.
 - Unit tests are `*Test` (Surefire); integration tests are `*IT` (Failsafe).
 - Test names state behaviour in domain words, e.g. `creditsNoInterestWithinFirstThirtyDays`.
