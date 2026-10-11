@@ -172,6 +172,20 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     assertThat(balances(deposits)).isEqualTo(oracleBalances(3));
   }
 
+  // Literals from the original calculator (commit 3efc9b5), applied three times.
+  @Test
+  void reachesTheOriginalBalancesAfterThreeUpdates() {
+    insertOneDepositPerPlan();
+
+    http.postForEntity(UPDATE_BALANCES, null, String.class);
+    http.postForEntity(UPDATE_BALANCES, null, String.class);
+    JsonNode deposits = json(http.postForEntity(UPDATE_BALANCES, null, String.class).getBody());
+
+    assertThat(balances(deposits))
+        .containsExactly(
+            new BigDecimal("10025.02"), new BigDecimal("5037.59"), new BigDecimal("20251.04"));
+  }
+
   @Test
   void leavesPremiumAtThirtyDaysAndStudentAtFourHundredDaysUnchanged() {
     tables.insertDeposit(1, "premium", 30, "10000.00");
@@ -195,32 +209,24 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   @Test
   void appliesEveryConcurrentUpdateExactlyOnce() throws Exception {
     insertOneDepositPerPlan();
-    CountDownLatch start = new CountDownLatch(1);
-    ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_UPDATES);
-    List<Future<ResponseEntity<String>>> responses =
-        IntStream.range(0, CONCURRENT_UPDATES)
-            .mapToObj(
-                update ->
-                    executor.submit(
-                        () -> {
-                          start.await();
-                          return http.postForEntity(UPDATE_BALANCES, null, String.class);
-                        }))
-            .toList();
 
-    long started = System.nanoTime();
-    start.countDown();
-    List<HttpStatusCode> statuses = new ArrayList<>();
-    for (Future<ResponseEntity<String>> response : responses) {
-      statuses.add(response.get(30, TimeUnit.SECONDS).getStatusCode());
-    }
-    Duration wallTime = Duration.ofNanos(System.nanoTime() - started);
-    executor.shutdown();
+    List<HttpStatusCode> statuses = updateBalancesConcurrently();
 
-    LOG.info("{} concurrent balance updates took {} ms", CONCURRENT_UPDATES, wallTime.toMillis());
     assertThat(statuses).hasSize(CONCURRENT_UPDATES).containsOnly(HttpStatus.OK);
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
         .isEqualTo(oracleBalances(CONCURRENT_UPDATES));
+  }
+
+  // Literals from the original calculator (commit 3efc9b5), applied five times.
+  @Test
+  void reachesTheOriginalBalancesAfterFiveConcurrentUpdates() throws Exception {
+    insertOneDepositPerPlan();
+
+    updateBalancesConcurrently();
+
+    assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
+        .containsExactly(
+            new BigDecimal("10041.73"), new BigDecimal("5062.81"), new BigDecimal("20420.15"));
   }
 
   @Test
@@ -271,6 +277,44 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   void answersNotFoundBeyondTheTwoEndpoints(String path) {
     assertThat(http.getForEntity(path, String.class).getStatusCode())
         .isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  // ASSUMPTION A1: /error is Spring Boot's error handling, not an endpoint; called directly it
+  // has no error to render and answers 500.
+  @Test
+  void answersTheFrameworkErrorPageWithServerError() {
+    assertThat(http.getForEntity("/error", String.class).getStatusCode())
+        .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  private List<HttpStatusCode> updateBalancesConcurrently() throws Exception {
+    CountDownLatch start = new CountDownLatch(1);
+    ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_UPDATES);
+    try {
+      List<Future<ResponseEntity<String>>> responses =
+          IntStream.range(0, CONCURRENT_UPDATES)
+              .mapToObj(
+                  update ->
+                      executor.submit(
+                          () -> {
+                            start.await();
+                            return http.postForEntity(UPDATE_BALANCES, null, String.class);
+                          }))
+              .toList();
+      long started = System.nanoTime();
+      start.countDown();
+      List<HttpStatusCode> statuses = new ArrayList<>();
+      for (Future<ResponseEntity<String>> response : responses) {
+        statuses.add(response.get(30, TimeUnit.SECONDS).getStatusCode());
+      }
+      LOG.info(
+          "{} concurrent balance updates took {} ms",
+          CONCURRENT_UPDATES,
+          Duration.ofNanos(System.nanoTime() - started).toMillis());
+      return statuses;
+    } finally {
+      executor.shutdownNow();
+    }
   }
 
   private void insertOneDepositPerPlan() {
