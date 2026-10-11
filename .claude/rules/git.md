@@ -26,7 +26,7 @@ A commit message is **exactly one line**:
 
    | scope | covers |
    |---|---|
-   | `domain` | `TimeDeposit`, `TimeDepositCalculator`, plans, interest and lifecycle rules |
+   | `domain` | `TimeDeposit`, `TimeDepositCalculator`, plans and interest rules |
    | `app` | use cases / application services and ports |
    | `api` | OpenAPI contract and REST adapter |
    | `persistence` | JPA entities, repositories, persistence adapter |

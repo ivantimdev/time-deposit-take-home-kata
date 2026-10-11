@@ -7,7 +7,7 @@ description: Add a new business requirement safely - restate it, check constrain
 
 Use for every new requirement, including a later requirement or a future change.
 
-1. **Restate** the requirement as one business rule in the vocabulary of `docs/ASSIGNMENT.md` (`planType`, `days`, `balance`, `withdrawals`). Name its rule family: interest, lifecycle, persistence or API.
+1. **Restate** the requirement as one business rule in the vocabulary of `docs/ASSIGNMENT.md` (`planType`, `days`, `balance`, `withdrawals`). Name its rule family, for example interest, persistence or API, or state that it is a new rule family.
 2. **Constraints** — list which hard constraints in `AGENTS.md` it touches and how they stay intact.
 3. **Design gate** — if the change adds a rule family, changes a documented assumption, or has more than one reasonable placement:
    - present at least two designs, each with its placement, the files it changes and its trade-offs;
