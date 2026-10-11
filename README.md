@@ -17,15 +17,17 @@ You need Docker with Docker Compose. Nothing else.
    ```
 
    The first build downloads the Maven dependencies and takes a few minutes.
-   The service listens on `http://localhost:8080`.
+   The service is ready when the log shows `Started TimeDepositApplication`.
+   It listens on `http://localhost:8080`.
    It runs with the `local` profile, which loads four sample deposits.
+   If host port 5432 is taken, change the published PostgreSQL port in `compose.yaml`.
 
 2. Open Swagger UI at `http://localhost:8080/swagger-ui/index.html`.
    The contract itself is served at `http://localhost:8080/openapi.yaml`.
 
 3. Call both endpoints from Swagger UI:
    1. Expand `GET /api/v1/time-deposits`, click *Try it out*, then *Execute*.
-      The response lists the four sample deposits, each with a balance of `10000.00`.
+      The response lists the four sample deposits, each with a balance of `10000.00` on a fresh volume.
    2. Expand `POST /api/v1/time-deposits/update-balances`, click *Try it out*, then *Execute*.
       Each eligible deposit has earned one month of interest:
 
@@ -56,12 +58,14 @@ You need Docker with Docker Compose. Nothing else.
 
 ### Without Docker Compose for the service
 
-For development, run only PostgreSQL in Docker and the service with Maven (JDK 17 needed):
+For development, run only PostgreSQL in Docker, in the background, and the service with Maven (JDK 17 needed):
 
 ```bash
-docker compose up postgres
+docker compose up -d postgres
 cd java && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
+
+Stop the service with `Ctrl+C`, then PostgreSQL with `docker compose down`.
 
 ## How to test
 
@@ -84,7 +88,7 @@ cd java && ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCovera
 Static analysis (sanitation) without changing files; any finding fails it:
 
 ```bash
-cd java && ./mvnw -Psanitize rewrite:dryRun -Drewrite.failOnDryRunResults=true
+cd java && ./mvnw -Psanitize rewrite:dryRun
 ```
 
 Repository guard rails (protected files, commit messages, the two API operations, banned patterns, assumptions):
