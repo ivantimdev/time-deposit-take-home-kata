@@ -1,14 +1,8 @@
-node_modules/
 target/
 .DS_Store
-bin/
-obj/
-__pycache__/
-.vs/
 .idea/
-package-lock.json
 .vscode/
-# private AI orchestration (step prompts are published sanitized under docs/ai/prompts)
+# private AI orchestration (the step prompts are published under docs/ai/prompts)
 /prompts/
 .claude/settings.local.json
 # IDE
