@@ -1,2 +1,4 @@
 17f26582b44b53e2be25922580ebd8e26138ca48e0bf3f6613ea6159e7641fd9  java/src/main/java/org/ikigaidigital/TimeDeposit.java
 b53626a2142d64cbda4bf4c390bde32f349de34d7f7260cc365bd2405d4f3f2d  docs/ASSIGNMENT.md
+4a1c91d8540ac9559120e1f792547cb3f15a8e475b2d32f5061cc2b11582e658  java/src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java
+0662d942eb7ff8a7991fb16fac87a1b7b8a65a42e6d4fb52f22e812f2d1539d8  java/src/test/java/org/ikigaidigital/TimeDepositCalculatorPublicApiTest.java

@@ -2,3 +2,6 @@
 java/src/main/java/org/ikigaidigital/TimeDeposit.java
 # The assignment text itself
 docs/ASSIGNMENT.md
+# Characterization tests: they define "behaviour unchanged"; extend only by adding new test classes
+java/src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java
+java/src/test/java/org/ikigaidigital/TimeDepositCalculatorPublicApiTest.java
