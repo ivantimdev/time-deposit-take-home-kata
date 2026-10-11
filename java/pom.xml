@@ -160,6 +160,9 @@
                             <targetTests>
                                 <param>org.ikigaidigital.*Test</param>
                             </targetTests>
+                            <!-- scores reached by the characterization tests of the original calculator -->
+                            <mutationThreshold>100</mutationThreshold>
+                            <coverageThreshold>100</coverageThreshold>
                             <outputFormats>
                                 <param>HTML</param>
                                 <param>XML</param>
