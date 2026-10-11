@@ -106,9 +106,8 @@
                 <configuration>
                     <java>
                         <excludes>
-                            <!-- original kata sources; each is formatted when it is first changed; TimeDeposit.java is never changed -->
+                            <!-- original kata source, frozen by the assignment -->
                             <exclude>src/main/java/org/ikigaidigital/TimeDeposit.java</exclude>
-                            <exclude>src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclude>
                         </excludes>
                         <googleJavaFormat>
                             <!-- newest release Spotless accepts on JDK 17, the JDK CI builds with -->
@@ -160,7 +159,7 @@
                             <targetTests>
                                 <param>org.ikigaidigital.*Test</param>
                             </targetTests>
-                            <!-- scores reached by the characterization tests of the original calculator -->
+                            <!-- scores reached by the unit tests of the domain -->
                             <mutationThreshold>100</mutationThreshold>
                             <coverageThreshold>100</coverageThreshold>
                             <outputFormats>
@@ -195,9 +194,8 @@
                             <failOnDryRunResults>true</failOnDryRunResults>
                             <failOnInvalidActiveRecipes>true</failOnInvalidActiveRecipes>
                             <exclusions>
-                                <!-- original kata sources stay untouched until each is first rewritten; TimeDeposit.java is never changed -->
+                                <!-- original kata source, frozen by the assignment -->
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDeposit.java</exclusion>
-                                <exclusion>**/src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclusion>
                             </exclusions>
                         </configuration>
                     </plugin>

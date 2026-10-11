@@ -1,3 +1,2 @@
-# Original kata sources, exempt from banned patterns until each is first changed; TimeDeposit.java is never changed.
+# Original kata source, frozen by the assignment and therefore exempt from banned patterns.
 java/src/main/java/org/ikigaidigital/TimeDeposit.java
-java/src/main/java/org/ikigaidigital/TimeDepositCalculator.java
