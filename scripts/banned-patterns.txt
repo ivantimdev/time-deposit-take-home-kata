@@ -1,0 +1,14 @@
+# One extended regex per line, matched against java/src/**/*.java; prefix with icase: for a case-insensitive match.
+# narrating comments
+^\s*//\s*(import|create|initialize|initialise|return|set|get|loop|check|call|define|declare|instantiate|iterate|increment)\b
+\bThis (method|class|function|constructor|test)
+\b(TODO|FIXME|XXX)\b
+@author
+[Gg]enerated by
+# debugging and smells
+System\.(out|err)\.print
+\bclass \w+(Impl|Helper|Utils?|Manager)\b
+\b(xs|a2d|tmp|obj|ret|res)\b
+# forbidden frameworks and styles
+@Data\b
+@Autowired

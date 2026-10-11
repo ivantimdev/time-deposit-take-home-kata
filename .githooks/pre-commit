@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Checks google-java-format formatting of the staged .java files; skipped when none are staged.
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.java')
+[ -n "$staged" ] || exit 0
+
+files=$(echo "$staged" | sed "s#^#$repo_root/#" | paste -sd, -)
+cd "$repo_root/java"
+./mvnw -q spotless:check -DspotlessFiles="$files"

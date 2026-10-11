@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Rejects commit messages that break .claude/rules/git.md: one line, conventional subject, at most 72 characters.
+set -euo pipefail
+
+readonly COMMIT_SUBJECT='^(feat|fix|refactor|test|docs|build|ci|chore)\([a-z]+\): [a-z].{0,70}[^.]$'
+
+reject() {
+  echo "commit-msg: $1" >&2
+  echo "see .claude/rules/git.md" >&2
+  exit 1
+}
+
+message=$(grep -vE '^#' "$1" | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}' || true)
+subject=$(echo "$message" | head -1)
+
+[ -n "$subject" ] || reject "message is empty"
+[ "$(echo "$message" | wc -l | tr -d ' ')" -eq 1 ] || reject "message must be exactly one line (no body, no trailers)"
+[ "${#subject}" -le 72 ] || reject "subject is ${#subject} characters (max 72)"
+echo "$subject" | grep -qE "$COMMIT_SUBJECT" || reject "subject must match $COMMIT_SUBJECT"
