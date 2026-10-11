@@ -4,7 +4,7 @@ A Spring Boot / PostgreSQL service exposing two endpoints — update all balance
 deposits — built as a hexagonal refactoring of the original time deposit calculator.
 The calculator keeps its public API and its results, pinned by characterization tests; the
 interest rules live in a plan catalogue, and the API is generated from an OpenAPI contract.
-The assignment is in [docs/ASSIGNMENT.md](docs/ASSIGNMENT.md).
+The original README is kept verbatim as [docs/ASSIGNMENT.md](docs/ASSIGNMENT.md), so that this one can describe the solution.
 
 [![CI](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ivantimdev/time-deposit-take-home-kata/actions/workflows/ci.yml?query=branch%3Amain)
 
@@ -137,6 +137,10 @@ Request flows, money handling and what is out of scope: [docs/ARCHITECTURE.md](d
 
 Every reading of an ambiguous requirement is recorded in [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md)
 and cited in the code as `// ASSUMPTION A<n>`.
+
+## Requirements
+
+[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) maps every requirement of the assignment to the code that implements it and the test that proves it.
 
 ## AI-assisted development
 
