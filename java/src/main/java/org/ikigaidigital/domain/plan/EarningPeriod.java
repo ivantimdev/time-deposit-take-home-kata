@@ -2,6 +2,12 @@ package org.ikigaidigital.domain.plan;
 
 public record EarningPeriod(int firstDay, int lastDay) {
 
+  public EarningPeriod {
+    if (firstDay > lastDay) {
+      throw new IllegalArgumentException("first day " + firstDay + " is after last day " + lastDay);
+    }
+  }
+
   public static EarningPeriod from(int day) {
     return new EarningPeriod(day, Integer.MAX_VALUE);
   }

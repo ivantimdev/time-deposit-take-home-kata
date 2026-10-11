@@ -32,4 +32,17 @@ class EarningPeriodTest {
     assertThatThrownBy(() -> EarningPeriod.after(Integer.MAX_VALUE))
         .isInstanceOf(ArithmeticException.class);
   }
+
+  @ParameterizedTest(name = "day {0} -> {1}")
+  @CsvSource({"30, false", "31, true", "32, false"})
+  void singleDayPeriodIncludesOnlyThatDay(int days, boolean included) {
+    assertThat(EarningPeriod.between(31, 31).includes(days)).isEqualTo(included);
+  }
+
+  @Test
+  void periodEndingBeforeItStartsIsRejected() {
+    assertThatThrownBy(() -> EarningPeriod.between(32, 31))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContainingAll("32", "31");
+  }
 }
