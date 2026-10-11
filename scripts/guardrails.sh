@@ -55,22 +55,33 @@ check_contract_operations() {
   fi
   local count
   # Counts the HTTP methods directly under each path item, whatever the indentation or key quoting; needs no
-  # YAML library. A path item that is a $ref would hide its operations elsewhere, so it is rejected.
+  # YAML library. Path items and operations must be plain block mappings: a $ref, alias, anchor or flow
+  # mapping could hide an operation from the count, so any of them is rejected.
   count=$(python3 - "$CONTRACT" <<'PY'
 import sys
 
 methods = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
+unreadable_starts = {"{", "[", "*", "&", "<", "!"}
 count = 0
 in_paths = False
 path_indent = None
 operation_indent = None
+
+
+def reject():
+    print("unreadable")
+    sys.exit(0)
+
+
 with open(sys.argv[1]) as contract:
     for raw in contract:
         line = raw.split("#", 1)[0].rstrip()
         if not line.strip():
             continue
         indent = len(line) - len(line.lstrip())
-        key = line.strip().split(":", 1)[0].strip("\"'")
+        key, _, value = line.strip().partition(":")
+        key = key.strip("\"'")
+        value = value.strip()
         if indent == 0:
             in_paths = key == "paths"
             path_indent = operation_indent = None
@@ -80,19 +91,24 @@ with open(sys.argv[1]) as contract:
         if path_indent is None:
             path_indent = indent
         if indent == path_indent:
+            if value or key[:1] in unreadable_starts:
+                reject()
             operation_indent = None
             continue
         if indent > path_indent and operation_indent is None:
             operation_indent = indent
-        if indent == operation_indent and key == "$ref":
-            print("ref")
-            sys.exit(0)
-        if indent == operation_indent and key in methods:
-            count += 1
+        if indent == operation_indent:
+            if key == "$ref" or key[:1] in unreadable_starts:
+                reject()
+            if key in methods:
+                if value:
+                    reject()
+                count += 1
 print(count)
 PY
 )
-  [ "$count" != ref ] || fail contract-operations "$CONTRACT declares a path item by \$ref; operations must be inline"
+  [ "$count" != unreadable ] ||
+    fail contract-operations "$CONTRACT uses a reference, alias, anchor or flow mapping under paths; write path items and operations as plain block mappings"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
