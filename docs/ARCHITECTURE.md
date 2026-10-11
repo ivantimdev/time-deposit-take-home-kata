@@ -63,6 +63,9 @@ The application layer imports the JDK, the domain zone and `org.springframework.
 [`ArchitectureTest`](../java/src/test/java/org/ikigaidigital/ArchitectureTest.java) enforces these rules with ArchUnit, one rule per test, including "no package cycles" and "every use-case method is `@Transactional`".
 The full rules are in [`.claude/rules/architecture.md`](../.claude/rules/architecture.md).
 
+Lombok appears only in `adapter.*` and `config`, for boilerplate a reader would skip (`@RequiredArgsConstructor`, `@Getter`, JPA's protected no-arg constructor).
+The domain zone and the application layer are plain records and classes, so that they stay free of any framework and of generated members the static analysis cannot see.
+
 ## Request flows
 
 ### `GET /api/v1/time-deposits`
@@ -78,7 +81,7 @@ The full rules are in [`.claude/rules/architecture.md`](../.claude/rules/archite
 1. `TimeDepositsController.updateBalances` calls `UpdateBalancesUseCase`; `UpdateBalancesService` opens a read-write transaction.
 2. The adapter loads all deposits ordered by `id` with a row lock (`PESSIMISTIC_WRITE`); the rows stay locked until the transaction ends (ASSUMPTION A10).
 3. `TimeDepositCalculator.updateBalance` credits one month of interest to each deposit, as the original did (ASSUMPTION A7).
-4. The adapter writes only the `balance` column of each deposit, then reads all deposits with their withdrawals in the same transaction.
+4. The adapter changes only the balance of each deposit (Hibernate's `UPDATE` statement sets every mapped column, the others with their unchanged values), then reads all deposits with their withdrawals in the same transaction.
 5. The transaction commits, which releases the locks, and the controller answers `200` with the updated deposits (ASSUMPTION A8).
 
 ## Domain model
@@ -160,7 +163,7 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 | Characterization tests (frozen) | The original calculator's results: 140 cases and its public API; their files are protected by hash. | `cd java && ./mvnw test -Dtest='TimeDepositCalculatorTest,TimeDepositCalculatorPublicApiTest'` |
 | ArchUnit | Layer dependencies, no cycles, transactional use cases. | `cd java && ./mvnw test -Dtest=ArchitectureTest` |
 | Testcontainers | Persistence and endpoint integration tests (`*IT`) against a real `postgres:17-alpine`. | `cd java && ./mvnw verify` |
-| Pitest | 100 % mutation score and line coverage of the domain and application code. | `cd java && ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage` |
+| Pitest | 100 % mutation score and line coverage of the domain and application code: those classes are the kata's logic, a surviving mutant there is a missing test, and the thresholds are never lowered. | `cd java && ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage` |
 | OpenRewrite | Dead code and static analysis findings; any finding fails. Recipes in [`java/rewrite.yml`](../java/rewrite.yml). | `cd java && ./mvnw -Psanitize rewrite:dryRun` |
 | Spotless | google-java-format formatting. | `cd java && ./mvnw spotless:check` |
 | Spectral | The contract against `spectral:oas` and the rules in [`.spectral.yaml`](../.spectral.yaml); warnings fail. | `npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml` |

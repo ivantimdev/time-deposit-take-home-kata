@@ -7,7 +7,7 @@ Every file named here is in the repository.
 
 - **Claude Code** 2.1.287, run in the terminal at the repository root, for every step.
 - **Models**, as the developer states them: "Fable 5.1 for design; Opus 5.5 for coding implementation".
-  The design session ran with Fable 5.1 in the Claude app; the orchestrator, the step agents and the review agents ran with Opus 5.5 in Claude Code.
+  The design session ran with Fable 5.1 in the Claude app; the orchestrator, the step agents and the review agents of steps 1 to 8 ran with Opus 5.5 in Claude Code; the final review and its fixes (step 9) ran with Fable 5.1 in Claude Code.
 - **Repository harness**, loaded by Claude Code from the repository itself:
 
 | file | role |
