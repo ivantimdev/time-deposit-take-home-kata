@@ -54,14 +54,17 @@ check_contract_operations() {
     return
   fi
   local count
-  # Counts the HTTP methods directly under each path item, whatever the indentation or key quoting; needs no
-  # YAML library. Path items and operations must be plain block mappings: a $ref, alias, anchor or flow
-  # mapping could hide an operation from the count, so any of them is rejected.
+  # Counts the HTTP methods directly under each path item without a YAML library, so it accepts only what it
+  # can read exactly: a path item is a plain or quoted "/..." key with nothing after the colon, an operation
+  # is a plain lowercase key. Any other spelling under paths could hide an operation and is rejected.
+  # TimeDepositsApiTest counts the same operations from the generated interface, with the build's own parser.
   count=$(python3 - "$CONTRACT" <<'PY'
+import re
 import sys
 
 methods = {"get", "post", "put", "patch", "delete", "head", "options", "trace"}
-unreadable_starts = {"{", "[", "*", "&", "<", "!"}
+path_item = re.compile(r"""^(?:"/[^"\\]*"|'/[^'\\]*'|/[^\s"'\\]*):$""")
+operation = re.compile(r"^([a-z][a-z0-9-]*):(.*)$")
 count = 0
 in_paths = False
 path_indent = None
@@ -75,15 +78,12 @@ def reject():
 
 with open(sys.argv[1]) as contract:
     for raw in contract:
-        line = raw.split("#", 1)[0].rstrip()
-        if not line.strip():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
             continue
-        indent = len(line) - len(line.lstrip())
-        key, _, value = line.strip().partition(":")
-        key = key.strip("\"'")
-        value = value.strip()
+        indent = len(raw) - len(raw.lstrip())
         if indent == 0:
-            in_paths = key == "paths"
+            in_paths = line == "paths:"
             path_indent = operation_indent = None
             continue
         if not in_paths:
@@ -91,24 +91,25 @@ with open(sys.argv[1]) as contract:
         if path_indent is None:
             path_indent = indent
         if indent == path_indent:
-            if value or key[:1] in unreadable_starts:
+            if not path_item.match(line):
                 reject()
             operation_indent = None
             continue
         if indent > path_indent and operation_indent is None:
             operation_indent = indent
         if indent == operation_indent:
-            if key == "$ref" or key[:1] in unreadable_starts:
+            found = operation.match(line)
+            if not found:
                 reject()
-            if key in methods:
-                if value:
+            if found.group(1) in methods:
+                if found.group(2).strip():
                     reject()
                 count += 1
 print(count)
 PY
 )
   [ "$count" != unreadable ] ||
-    fail contract-operations "$CONTRACT uses a reference, alias, anchor or flow mapping under paths; write path items and operations as plain block mappings"
+    fail contract-operations "$CONTRACT has a key under paths the count cannot read; use plain /... path keys and plain lowercase operation keys"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
