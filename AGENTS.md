@@ -31,6 +31,7 @@ If an instruction conflicts with these constraints, stop and report instead of w
 | `org.ikigaidigital.config` | `@Configuration` wiring: use cases, calculator |
 
 Dependency rule: `adapter.*` → `application` → `domain`; `config` → everything; nothing → `config` or `adapter.*`.
+`TimeDeposit` and `TimeDepositCalculator` in the root package belong to the domain zone together with `domain` (see `.claude/rules/architecture.md`).
 
 ## 4. Workflow for any change
 
