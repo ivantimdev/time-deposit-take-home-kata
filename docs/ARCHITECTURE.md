@@ -133,6 +133,7 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 - At both boundaries, the persistence adapter and the response mapper, the `Double` balance becomes `BigDecimal.valueOf(balance).setScale(2, HALF_UP)`.
   `BigDecimal.valueOf` reads the shortest decimal form, which is the cents the calculator produced; `new BigDecimal(double)` would expose binary noise such as `10008.330000000002`.
   Loading converts back with `doubleValue()`.
+- Balances up to 15 significant digits, about 9 999 999 999 999.99, round-trip exactly between the `NUMERIC(19,2)` column and the frozen `Double`; the column keeps the assignment's `Decimal` width, and larger balances are outside this exercise's scope (ASSUMPTION A21).
 - The contract types money as `type: number` with no format, so the generated models use `BigDecimal` and no `double` reaches the JSON (ASSUMPTION A16).
 - `Withdrawal.amount` is a `BigDecimal` from the database to the JSON and never passes through `double`.
 
@@ -142,9 +143,31 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 - The pessimistic lock serialises concurrent updates, so none is lost and none is applied twice.
   `TimeDepositsApiIT` sends five concurrent `POST`s and expects the balances of five sequential updates; removing `@Lock` from `TimeDepositJpaRepository.findAllForUpdate` makes this test fail.
 - `POST` is not idempotent: every call credits one more month (ASSUMPTION A8, A17).
+- Cadence: one call applies one month of interest, `annualRate / 12`, whatever the value of `days`.
+  `days` gates which plans earn, it does not scale the amount; the method does not advance `days` and does not know the calendar.
+  The service assumes it is invoked once per period by the scheduler that owns the calendar, the month-end run; a skipped period is not caught up, because `days` is an age, not a date (ASSUMPTION A7).
+  Calling it twice posts two months. Controlling the cadence, and idempotency across retries, belongs to the caller or to a period record, not to a value in the client request and not to this service in the current scope (ASSUMPTION A8).
+- Through this API alone `days` never changes, so no deposit crosses day 46 or day 366 unless the stored `days` changes; the age is maintained by the data owner.
 - Not built: running the update on a monthly schedule safely.
   That would need a record of which month each deposit was last credited for, so that a retried or doubled run credits nothing.
   The assignment's schema has no field for it, and `updateBalance` has no notion of time (ASSUMPTION A10).
+
+## Scaling the update
+
+Today the update is one transaction: all deposits are locked with `SELECT … ORDER BY id FOR NO KEY UPDATE`, credited and saved atomically, so a failure leaves no partial month and concurrent calls serialise.
+This bounds the dataset to what one transaction and the JVM heap hold, which is adequate here (ASSUMPTION A22).
+
+At scale the operation becomes an asynchronous job:
+
+- `POST` answers `202 Accepted` with a job id.
+- A worker processes the deposits in keyset batches (`WHERE id > :lastId ORDER BY id LIMIT n`), one transaction per batch.
+  Batching by page number is rejected, because the rows being updated change the result set between pages.
+- A `balance_postings(time_deposit_id, period)` table with a unique constraint makes every batch idempotent, so a failed or retried batch never double-credits.
+  That table is also where run-once-per-period idempotency would live.
+- Progress is exposed through a job resource.
+
+This would add endpoints and a table, both outside today's scope (ASSUMPTION A1, A22).
+Adding tables is permitted by the assignment; changing `TimeDeposit` is not.
 
 ## Deliberately out of scope
 

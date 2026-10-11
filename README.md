@@ -117,7 +117,7 @@ contract and fails the build.
 | method | path | purpose |
 |---|---|---|
 | `GET` | `/api/v1/time-deposits` | List all time deposits, each with its withdrawals. |
-| `POST` | `/api/v1/time-deposits/update-balances` | Credit one month of interest to every deposit and return the updated deposits. |
+| `POST` | `/api/v1/time-deposits/update-balances` | Posts one month of interest to every eligible deposit and returns the updated deposits. Two calls post two months: the caller is the month-end scheduler ([Architecture › Concurrency and idempotency](docs/ARCHITECTURE.md#concurrency-and-idempotency)). |
 
 The contract is [java/src/main/resources/openapi/openapi.yaml](java/src/main/resources/openapi/openapi.yaml).
 With the service running, Swagger UI is at `http://localhost:8080/swagger-ui/index.html`
