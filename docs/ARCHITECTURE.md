@@ -167,4 +167,4 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 | OpenRewrite | Dead code and static analysis findings; any finding fails. Recipes in [`java/rewrite.yml`](../java/rewrite.yml). | `cd java && ./mvnw -Psanitize rewrite:dryRun` |
 | Spotless | google-java-format formatting. | `cd java && ./mvnw spotless:check` |
 | Spectral | The contract against `spectral:oas` and the rules in [`.spectral.yaml`](../.spectral.yaml); warnings fail. | `npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml` |
-| Guard rails | Protected-file hashes, commit messages, exactly two operations, no hand-written mappings, banned patterns, no embedded database, assumption references. | `scripts/guardrails.sh` |
+| Guard rails | Protected-file hashes, commit messages, exactly two operations (counted again, exactly, by `TimeDepositsApiTest` from the generated interfaces), no hand-written mappings, banned patterns, no embedded database, assumption references. | `scripts/guardrails.sh` |
