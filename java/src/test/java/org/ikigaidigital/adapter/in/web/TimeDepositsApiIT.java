@@ -263,6 +263,17 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     assertThat(http.getForEntity(path, String.class).getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
+  // The bundled scripts open with "For license information please see <script>.LICENSE.txt".
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "/swagger-ui/swagger-ui-bundle.js.LICENSE.txt",
+        "/swagger-ui/swagger-ui-standalone-preset.js.LICENSE.txt"
+      })
+  void servesTheLicenceNoticesOfTheBundledScripts(String path) {
+    assertThat(http.getForEntity(path, String.class).getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
   // ASSUMPTION A1: nothing but the two operations and their documentation answers.
   @ParameterizedTest
   @ValueSource(

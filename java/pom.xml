@@ -135,8 +135,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Swagger UI renders the contract from static files; springdoc's UI needs runtime introspection.
-                     Only the three assets the page loads are unpacked, so the webjar's demo pages are never served. -->
+                <!-- ASSUMPTION A20: Swagger UI renders the contract from static files; springdoc's UI needs runtime
+                     introspection. Only the three assets the page loads are unpacked, with the licence notices
+                     their bundled third-party code refers to, so the webjar's demo pages are never served. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.11.0</version>
@@ -156,7 +157,7 @@
                                     <outputDirectory>${project.build.outputDirectory}/static/swagger-ui</outputDirectory>
                                     <!-- unpack on every build, so a cleaned output directory never lacks the assets -->
                                     <overWrite>true</overWrite>
-                                    <includes>META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui.css,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-bundle.js,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-standalone-preset.js</includes>
+                                    <includes>META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui.css,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-bundle.js,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-bundle.js.LICENSE.txt,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-standalone-preset.js,META-INF/resources/webjars/swagger-ui/${swagger-ui.version}/swagger-ui-standalone-preset.js.LICENSE.txt</includes>
                                     <fileMappers>
                                         <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
                                     </fileMappers>
