@@ -109,7 +109,6 @@
                             <!-- original kata sources; each is formatted when it is first changed; TimeDeposit.java is never changed -->
                             <exclude>src/main/java/org/ikigaidigital/TimeDeposit.java</exclude>
                             <exclude>src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclude>
-                            <exclude>src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java</exclude>
                         </excludes>
                         <googleJavaFormat>
                             <!-- newest release Spotless accepts on JDK 17, the JDK CI builds with -->
@@ -196,7 +195,6 @@
                                 <!-- original kata sources stay untouched until each is first rewritten; TimeDeposit.java is never changed -->
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDeposit.java</exclusion>
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclusion>
-                                <exclusion>**/src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java</exclusion>
                             </exclusions>
                         </configuration>
                     </plugin>
