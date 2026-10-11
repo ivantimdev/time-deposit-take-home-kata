@@ -25,7 +25,7 @@ If an instruction conflicts with these constraints, stop and report instead of w
 | `org.ikigaidigital.domain` | `Withdrawal`, read models, `plan/` (interest policy, rate, earning period, plan catalogue) |
 | `org.ikigaidigital.application.port.in` | use-case interfaces |
 | `org.ikigaidigital.application.port.out` | `TimeDepositRepository` |
-| `org.ikigaidigital.application.service` | use-case implementations, framework-free |
+| `org.ikigaidigital.application.service` | use-case implementations; framework-free except `@Transactional` (ASSUMPTION A2) |
 | `org.ikigaidigital.adapter.in.web` | controller implementing the generated API interface, DTO mappers |
 | `org.ikigaidigital.adapter.out.persistence` | JPA entities, Spring Data repositories, persistence adapter |
 | `org.ikigaidigital.config` | `@Configuration` wiring: use cases, calculator |
