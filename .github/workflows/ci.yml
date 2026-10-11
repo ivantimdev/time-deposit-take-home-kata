@@ -8,19 +8,18 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
+# Runs on main and release tags are never cancelled, so every main commit gets its sha- image.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -34,17 +33,18 @@ jobs:
         with:
           name: jacoco
           path: java/target/site/jacoco
-          if-no-files-found: ignore
+          if-no-files-found: error
       - name: Upload integration test reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: failsafe-reports
           path: java/target/failsafe-reports
-          if-no-files-found: ignore
+          if-no-files-found: error
 
   contract-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -55,7 +55,8 @@ jobs:
         run: npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml
 
   sanitize:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -67,17 +68,21 @@ jobs:
         run: cd java && ./mvnw -B -Psanitize rewrite:dryRun
 
   guardrails:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      # The commit message check walks history from a fixed base commit.
+      # The commit message check walks history from a fixed base commit. On a pull request it
+      # checks the PR head, not GitHub's synthetic merge commit.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Repository guard rails
         run: scripts/guardrails.sh
 
   mutation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -93,12 +98,16 @@ jobs:
         with:
           name: pit-reports
           path: java/target/pit-reports
-          if-no-files-found: ignore
+          if-no-files-found: error
 
   publish-image:
     needs: [verify, contract-lint, sanitize, guardrails, mutation]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v7
       # The default docker driver cannot export the GitHub Actions layer cache; buildx can.
