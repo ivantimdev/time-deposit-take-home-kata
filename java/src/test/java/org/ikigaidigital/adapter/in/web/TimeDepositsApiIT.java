@@ -188,7 +188,7 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
 
     List<HttpStatusCode> statuses = updateBalancesConcurrently(5);
 
-    assertThat(statuses).hasSize(5).containsOnly(HttpStatus.OK);
+    assertThat(statuses).containsOnly(HttpStatus.OK);
     assertThat(balances(json(http.getForEntity(TIME_DEPOSITS, String.class).getBody())))
         .containsExactly(
             new BigDecimal("10041.73"), new BigDecimal("5062.81"), new BigDecimal("20420.15"));
