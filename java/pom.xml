@@ -192,7 +192,7 @@
                             </activeRecipes>
                             <failOnDryRunResults>true</failOnDryRunResults>
                             <exclusions>
-                                <!-- original kata sources: recipes would finalize TimeDeposit fields and change the calculator's rounding -->
+                                <!-- original kata sources stay untouched until each is first rewritten; TimeDeposit.java is never changed -->
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDeposit.java</exclusion>
                                 <exclusion>**/src/main/java/org/ikigaidigital/TimeDepositCalculator.java</exclusion>
                                 <exclusion>**/src/test/java/org/ikigaidigital/TimeDepositCalculatorTest.java</exclusion>
