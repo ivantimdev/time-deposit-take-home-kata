@@ -82,11 +82,21 @@ check_mapping_annotations() {
 }
 
 # A pattern prefixed with "icase:" is matched case-insensitively.
+# A pattern prefixed with "in:<directory> " is matched only in the .java files under that directory;
+# "in:" comes before "icase:" when both are used.
 check_banned_patterns() {
-  local excluded pattern flags file hit
+  local excluded pattern flags scope file hit
   excluded=$(entries scripts/guardrails-exclude.txt)
   while IFS= read -r pattern; do
     flags=-nE
+    scope=java/src
+    case "$pattern" in
+      in:*)
+        scope=${pattern%% *}
+        scope=${scope#in:}
+        pattern=${pattern#* }
+        ;;
+    esac
     case "$pattern" in
       icase:*) pattern=${pattern#icase:} flags=-niE ;;
     esac
@@ -94,7 +104,7 @@ check_banned_patterns() {
       echo "$excluded" | grep -qxF "$file" && continue
       hit=$(grep $flags -e "$pattern" "$file" | head -1 || true)
       [ -z "$hit" ] || fail banned-patterns "$file:$hit (pattern: $pattern)"
-    done < <(find java/src -name '*.java' -type f | sort)
+    done < <(find "$scope" -name '*.java' -type f 2>/dev/null | sort)
   done < <(entries scripts/banned-patterns.txt)
   pass banned-patterns
 }

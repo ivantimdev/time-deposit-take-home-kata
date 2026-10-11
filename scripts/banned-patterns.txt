@@ -1,4 +1,5 @@
-# One extended regex per line, matched against java/src/**/*.java; prefix with icase: for a case-insensitive match.
+# One extended regex per line, matched against java/src/**/*.java; prefix with icase: for a case-insensitive match,
+# and with in:<directory> followed by a space to match only the .java files under that directory.
 # narrating comments
 ^\s*//\s*(import|create|initialize|initialise|return|set|get|loop|check|call|define|declare|instantiate|iterate|increment)\b
 \bThis (method|class|function|constructor|test)
@@ -12,3 +13,6 @@ System\.(out|err)\.print
 # forbidden frameworks and styles
 @Data\b
 @Autowired
+# no Mockito in domain and application tests (testing.md): they use in-memory fakes
+in:java/src/test/java/org/ikigaidigital/domain/ \borg\.mockito\b
+in:java/src/test/java/org/ikigaidigital/application/ \borg\.mockito\b
