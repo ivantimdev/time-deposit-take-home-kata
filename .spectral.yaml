@@ -1,0 +1,15 @@
+extends: ["spectral:oas"]
+rules:
+  operation-operationId: error
+  operation-description: error
+  oas3-schema: error
+  paths-kebab-case:
+    description: Path segments are lowercase kebab-case or a path parameter.
+    message: "{{property}} is not kebab-case"
+    severity: error
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(/([a-z0-9]+(-[a-z0-9]+)*|\\{[a-zA-Z0-9]+\\}))+$"

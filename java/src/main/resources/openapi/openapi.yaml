@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: XA Bank Time Deposits API
+  version: 1.0.0
+  description: >-
+    Lists the bank's time deposits and applies one month of interest to all of them.
+    This contract is the single source of the API: the server interfaces are generated from it.
+  contact:
+    name: XA Bank time deposit team
+# ASSUMPTION A1: exactly two operations; this contract and Swagger UI document them and add no endpoint.
+# ASSUMPTION A19: no authentication; a bearer token checked at the gateway or by Spring Security would be added.
+servers:
+  - url: http://localhost:8080
+    description: Local run
+tags:
+  - name: time-deposits
+    description: Time deposits and their monthly interest.
+paths:
+  # ASSUMPTION A18: the /api/v1 prefix versions the API.
+  /api/v1/time-deposits:
+    get:
+      operationId: listTimeDeposits
+      tags:
+        - time-deposits
+      summary: List all time deposits
+      description: >-
+        Returns every time deposit with its withdrawals, deposits ordered by id and the
+        withdrawals of each deposit ordered by id.
+      responses:
+        '200':
+          description: All time deposits; an empty array when there are none.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeDeposit'
+  # ASSUMPTION A17: a controller resource, because the update is not idempotent and no update is retrievable.
+  /api/v1/time-deposits/update-balances:
+    post:
+      operationId: updateBalances
+      tags:
+        - time-deposits
+      summary: Update the balances of all time deposits
+      description: >-
+        Credits one month of interest to every time deposit according to its plan and returns
+        all deposits as they are after the update. Each call credits another month, so the
+        operation is not idempotent.
+      # ASSUMPTION A8: answers 200 with the updated deposits, in the shape of the list operation.
+      responses:
+        '200':
+          description: All time deposits after the update; an empty array when there are none.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeDeposit'
+components:
+  schemas:
+    TimeDeposit:
+      type: object
+      description: A time deposit with its withdrawals.
+      additionalProperties: false
+      required:
+        - id
+        - planType
+        - balance
+        - days
+        - withdrawals
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Identifier of the time deposit.
+          example: 1
+        planType:
+          type: string
+          description: Plan that sets the deposit's interest.
+          enum:
+            - basic
+            - student
+            - premium
+          example: basic
+        balance:
+          # ASSUMPTION A16: a number without format, so the generated model holds a BigDecimal.
+          type: number
+          description: Balance in the deposit's currency, with two decimals.
+          example: 10008.33
+        days:
+          type: integer
+          format: int32
+          description: Number of days since the deposit was opened.
+          example: 45
+        withdrawals:
+          type: array
+          description: Withdrawals from the deposit, ordered by id.
+          items:
+            $ref: '#/components/schemas/Withdrawal'
+    Withdrawal:
+      type: object
+      # ASSUMPTION A15: nested under its deposit, so the timeDepositId column is not repeated.
+      description: A withdrawal from the enclosing time deposit.
+      additionalProperties: false
+      required:
+        - id
+        - amount
+        - date
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Identifier of the withdrawal.
+          example: 1
+        amount:
+          type: number
+          description: Amount withdrawn, with two decimals.
+          example: 500.00
+        date:
+          type: string
+          format: date
+          description: Date of the withdrawal.
+          example: '2026-09-01'
