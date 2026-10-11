@@ -1,6 +1,7 @@
 package org.ikigaidigital.domain.plan;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,5 +53,18 @@ class PlanCatalogTest {
                 new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.from(1))));
 
     assertThat(basicOnly.planFor("student")).isEmpty();
+  }
+
+  @Test
+  void catalogueRejectsTwoPlansOfTheSameType() {
+    final Plan onePercent =
+        new Plan(
+            PlanType.BASIC, new FixedRateInterest(new AnnualRate(0.01), EarningPeriod.after(30)));
+    final Plan twelvePercent =
+        new Plan(
+            PlanType.BASIC, new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.from(1)));
+
+    assertThatThrownBy(() -> PlanCatalog.of(onePercent, twelvePercent))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 }

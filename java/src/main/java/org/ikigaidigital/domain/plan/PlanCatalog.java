@@ -10,7 +10,9 @@ public final class PlanCatalog {
 
   private PlanCatalog(Plan... plans) {
     for (Plan plan : plans) {
-      this.plans.put(plan.type(), plan);
+      if (this.plans.putIfAbsent(plan.type(), plan) != null) {
+        throw new IllegalArgumentException("more than one plan of type " + plan.type());
+      }
     }
   }
 

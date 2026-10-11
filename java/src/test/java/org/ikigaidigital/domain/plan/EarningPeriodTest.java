@@ -1,7 +1,9 @@
 package org.ikigaidigital.domain.plan;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -23,5 +25,11 @@ class EarningPeriodTest {
   @CsvSource({"-1, false", "0, false", "1, true", "2147483647, true"})
   void periodFromDayOneIncludesDayOne(int days, boolean included) {
     assertThat(EarningPeriod.from(1).includes(days)).isEqualTo(included);
+  }
+
+  @Test
+  void periodAfterTheLargestDayIsRejected() {
+    assertThatThrownBy(() -> EarningPeriod.after(Integer.MAX_VALUE))
+        .isInstanceOf(ArithmeticException.class);
   }
 }
