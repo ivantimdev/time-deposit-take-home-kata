@@ -30,8 +30,7 @@ class TimeDepositPersistenceAdapter implements TimeDepositRepository {
             .collect(Collectors.toMap(TimeDepositEntity::getId, Function.identity()));
     for (TimeDeposit deposit : deposits) {
       TimeDepositEntity entity = entitiesById.get(deposit.getId());
-      // The port saves only deposits it loaded; under the row lock a missing one is a defect, not
-      // input.
+      // The port saves only deposits it loaded; under the row lock a missing row is a defect.
       if (entity == null) {
         throw new IllegalStateException("no stored time deposit with id " + deposit.getId());
       }
