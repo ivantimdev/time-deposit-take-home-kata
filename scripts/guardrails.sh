@@ -2,6 +2,7 @@
 # Repository guard rails: protected files, commit messages, API surface, banned patterns, assumptions.
 # Usage: scripts/guardrails.sh   (from any directory; exits non-zero on the first failing check)
 #   GUARDRAILS_BASE=<commit>              first commit excluded from the message check (default 93d65c7)
+#     the default starts after 93d65c7 because the commit before it, b2b33f5, predates the convention and is kept as is
 #   GUARDRAILS_EXTRA_PATTERNS=<file>      extra extended regexes, one per line, matched against all tracked files
 # Prints PASS, FAIL <check>: <detail>, SKIP or WARN per check. Needs bash, git, python3, shasum, grep, awk.
 set -euo pipefail
