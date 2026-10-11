@@ -18,7 +18,7 @@ public enum PlanType {
     return code;
   }
 
-  // ASSUMPTION A6: codes match exactly and case-sensitively; any other code has no plan.
+  // ASSUMPTION A6: codes match exactly and case-sensitively; any other or a null code has no plan.
   public static Optional<PlanType> fromCode(String code) {
     return Arrays.stream(values()).filter(type -> type.code().equals(code)).findFirst();
   }
