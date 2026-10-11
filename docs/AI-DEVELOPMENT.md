@@ -58,7 +58,7 @@ sequenceDiagram
 ## Reproducibility
 
 1. Clone the repository and run `scripts/setup-hooks.sh` once to enable the git hooks.
-2. Install JDK 17, Docker (for the Testcontainers tests and Compose) and Node.js 18 or later (for the contract lint).
+2. Install JDK 17, Docker (for the Testcontainers tests and Compose) and Node.js 22, the release CI uses (for the contract lint).
 3. Open Claude Code at the repository root. It loads `CLAUDE.md`, which imports `AGENTS.md`, and the rules in `.claude/rules/`; the hook and command permissions come from `.claude/settings.json`.
 4. Run `/verify` to check the tree, and `/extend` to add a requirement through its design gate.
 5. To replay the build step by step, copy the files in [`docs/ai/prompts/`](ai/prompts/README.md) to `prompts/` (git-ignored), then give the prompts to fresh agents in order, under the orchestrator prompt. An optional extra pattern file can be passed to the guard rails with `GUARDRAILS_EXTRA_PATTERNS`; without it, that check is skipped.

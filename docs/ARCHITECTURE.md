@@ -111,8 +111,8 @@ These files change, and no others:
 1. [`PlanType.java`](../java/src/main/java/org/ikigaidigital/domain/plan/PlanType.java): a new constant with its code.
 2. [`PlanCatalog.java`](../java/src/main/java/org/ikigaidigital/domain/plan/PlanCatalog.java): a new entry in `standard()` with its rate and earning period.
 3. A new migration in [`db/migration/`](../java/src/main/resources/db/migration/) that drops the `plan_type` CHECK constraint and adds one that admits the new code (ASSUMPTION A12). V1 declares the constraint inline without a name, so PostgreSQL generated the name `time_deposits_plan_type_check`.
-4. [`openapi.yaml`](../java/src/main/resources/openapi/openapi.yaml): the code added to the `planType` enum; the generated model follows. No test ties this enum to `PlanType`, so this step is easy to miss.
-5. Tests: `PlanTypeTest` and `PlanCatalogTest` for the new constant and entry, a new calculator test class with literal expectations (the characterization tests are frozen), and a persistence test that the constraint accepts the code.
+4. [`openapi.yaml`](../java/src/main/resources/openapi/openapi.yaml): the code added to the `planType` enum; the generated model follows. `PlanTypeContractTest` fails until the enum lists the new code.
+5. Tests: `PlanTypeTest` and `PlanCatalogTest` for the new constant and entry, a new calculator test class with literal expectations (the characterization tests are frozen), a persistence test that the constraint accepts the code, and `PlanTypeContractTest` passing again.
 
 Apart from documentation (a row in `docs/ASSUMPTIONS.md` when the new plan's rule needs a reading), nothing else changes: the controller, the mappers, the converter, the use cases and the calculator stay as they are.
 
