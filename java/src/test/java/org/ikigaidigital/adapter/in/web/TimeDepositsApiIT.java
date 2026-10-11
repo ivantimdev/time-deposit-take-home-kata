@@ -86,6 +86,18 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
     assertDeposit(deposits.get(2), 3, "premium", "20000.00", 60);
   }
 
+  // A BigDecimal without its two-decimal scale would serialise 12000000.00 as 1.2E+7.
+  @Test
+  void rendersALargeBalanceInPlainDecimalNotation() {
+    tables.insertDeposit(1, "premium", 20, "12000000.00");
+
+    String body = http.getForEntity(TIME_DEPOSITS, String.class).getBody();
+
+    assertThat(body).contains("12000000.00").doesNotContain("E");
+    assertThat(json(body).get(0).get("balance").decimalValue())
+        .isEqualTo(new BigDecimal("12000000.00"));
+  }
+
   @Test
   void listsTheWithdrawalsOfEachTimeDepositOrderedById() {
     insertOneDepositPerPlan();
