@@ -7,7 +7,15 @@ import org.ikigaidigital.domain.plan.PlanCatalog;
 
 public class TimeDepositCalculator {
 
-  private final PlanCatalog plans = PlanCatalog.standard();
+  private final PlanCatalog plans;
+
+  public TimeDepositCalculator() {
+    this(PlanCatalog.standard());
+  }
+
+  public TimeDepositCalculator(PlanCatalog plans) {
+    this.plans = plans;
+  }
 
   public void updateBalance(List<TimeDeposit> deposits) {
     for (TimeDeposit deposit : deposits) {
