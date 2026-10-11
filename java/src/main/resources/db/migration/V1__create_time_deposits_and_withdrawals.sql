@@ -20,6 +20,5 @@ CREATE TABLE withdrawals (
     date            DATE          NOT NULL
 );
 
--- PostgreSQL does not index foreign key columns; this serves the foreign key lookups and
--- date-window queries over one deposit's withdrawals.
-CREATE INDEX withdrawals_time_deposit_id_date_idx ON withdrawals (time_deposit_id, date);
+-- PostgreSQL does not index foreign key columns; this serves the foreign key lookups.
+CREATE INDEX withdrawals_time_deposit_id_idx ON withdrawals (time_deposit_id);

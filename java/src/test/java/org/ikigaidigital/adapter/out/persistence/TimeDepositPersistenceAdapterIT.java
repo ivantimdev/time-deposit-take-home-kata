@@ -246,13 +246,13 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
   }
 
   @Test
-  void indexesWithdrawalsByDepositAndDate() {
+  void indexesWithdrawalsByDeposit() {
     assertThat(
             jdbc.queryForObject(
                 "select indexdef from pg_indexes where tablename = 'withdrawals'"
-                    + " and indexname = 'withdrawals_time_deposit_id_date_idx'",
+                    + " and indexname = 'withdrawals_time_deposit_id_idx'",
                 String.class))
-        .endsWith("(time_deposit_id, date)");
+        .endsWith("(time_deposit_id)");
   }
 
   private void insertDeposit(int id, String planType, int days, String balance) {
