@@ -12,6 +12,6 @@ FROM eclipse-temurin:17-jre-jammy
 RUN groupadd --system app && useradd --system --gid app --no-create-home app
 USER app
 WORKDIR /app
-COPY --from=build /build/target/time-deposit-kata-1.0-SNAPSHOT.jar app.jar
+COPY --from=build /build/target/time-deposit.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]

@@ -110,6 +110,8 @@
         </dependency>
     </dependencies>
     <build>
+        <!-- a version-free name, so the Dockerfile copies the same jar after a version bump -->
+        <finalName>time-deposit</finalName>
         <plugins>
             <plugin>
                 <groupId>org.openapitools</groupId>
