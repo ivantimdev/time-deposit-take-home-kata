@@ -26,8 +26,9 @@ Every file named here is in the repository.
 
 Each step started from a written prompt.
 A fresh Claude Code agent ran the prompt at the repository root, committed after a green `/verify`, and wrote a report.
-The orchestrator, a separate agent, then re-ran every check itself instead of trusting the report, and started a fresh review agent with no access to the step agent's context.
-The developer read the gate summary and the diff, decided on each finding, and either sent the step back for a fix round or approved it; only then was the branch pushed and the next step started.
+The orchestrator, a separate agent, then re-ran every check itself instead of trusting the report and, for every first round and some fix rounds, started a fresh review agent with no access to the step agent's context.
+The developer read the gate summary and the diff, decided on each finding, and either sent the step back for a fix round or approved it.
+The branch was pushed after the developer's approval, given per step or in advance for a fix round; in step 7 the step agent pushed itself, because CI had to run.
 Step 0, the harness itself, ran before the orchestrator existed and was approved commit by commit.
 [`docs/ai/WORKFLOW-LOG.md`](ai/WORKFLOW-LOG.md) lists every step's commits, gate outcome and fix rounds.
 
@@ -57,10 +58,10 @@ sequenceDiagram
 ## Reproducibility
 
 1. Clone the repository and run `scripts/setup-hooks.sh` once to enable the git hooks.
-2. Install Java 17 or later, Docker (for the Testcontainers tests and Compose) and Node.js 18 or later (for the contract lint).
+2. Install JDK 17, Docker (for the Testcontainers tests and Compose) and Node.js 18 or later (for the contract lint).
 3. Open Claude Code at the repository root. It loads `CLAUDE.md`, which imports `AGENTS.md`, and the rules in `.claude/rules/`; the hook and command permissions come from `.claude/settings.json`.
 4. Run `/verify` to check the tree, and `/extend` to add a requirement through its design gate.
-5. To replay the build step by step, give the prompts in [`docs/ai/prompts/`](ai/prompts/README.md) to fresh agents in order, under the orchestrator prompt.
+5. To replay the build step by step, copy the files in [`docs/ai/prompts/`](ai/prompts/README.md) to `prompts/` (git-ignored), then give the prompts to fresh agents in order, under the orchestrator prompt. An optional extra pattern file can be passed to the guard rails with `GUARDRAILS_EXTRA_PATTERNS`; without it, that check is skipped.
 
 ## Custom rules, prompts and configuration
 
@@ -92,14 +93,14 @@ All production code, tests, migrations, the contract, the Dockerfile, the CI wor
 ## What the harness caught
 
 - **Formatter and JDK (step 0).** The first build pinned google-java-format 1.37.0, which needs Java 21; Spotless on JDK 17 allows at most 1.28.0. The build looked green only because every existing file was still excluded from formatting. Fixed forward in `a287313`.
-- **A sanitation recipe that changed results (steps 0 and 1).** The composite static-analysis recipe would have rewritten `new BigDecimal(interest)` to `BigDecimal.valueOf(interest)`. The step 1 search then found balances where the two credit different cents (`basic` at `18.00`: `18.01` in the original, `18.02` after the rewrite). The recipe set became an explicit list without it (`da446f8`).
+- **A sanitation recipe that changed results (steps 0 and 1).** The composite static-analysis recipe would have rewritten `new BigDecimal(interest)` to `BigDecimal.valueOf(interest)`. In step 0 the recipe set became an explicit list without it (`da446f8`). The step 1 search then confirmed that the rewrite would have changed cents (`basic` at `18.00`: `18.01` in the original, `18.02` after the rewrite).
 - **Checks that passed without checking (step 0).** The documented `-Drewrite.failOnDryRunResults=true` flag was a no-op, so a dry run with findings ended in BUILD SUCCESS; the profile now sets the option. A misspelled recipe name was also skipped silently; the run now fails on it (`a067a05`).
 - **Demo pages behind the documentation (step 5).** The review agent found that the Swagger UI webjar also served its own demo page, an extra HTTP surface against A1. The build now bundles only the three assets the page needs, and a test expects `404` on the demo paths (`83b73ff`).
-- **A guard rail that would fail every pull request (step 7).** The review agent found that the commit-message check also read GitHub's generated merge commits. It now skips merge commits, and CI checks out the pull request head (`3633a85`).
+- **A guard rail that would fail every pull request (step 7).** The review agent found that the commit-message check also read GitHub's generated merge commits. It now skips merge commits (`3633a85`), and CI checks out the pull request head (`5fa475d`).
 
 ## Limits
 
-- The protected-files hook detects shell writes by pattern: a redirect, `sed -i`, `tee`, `rm`, `mv` or `cp` next to a protected path. It fired several times on commands that only mentioned a protected path while writing another file; the agent then used the Edit or Write tool. A write that never names the path is not detected; the hashes in `scripts/guardrails.sh` catch the change afterwards.
+- The protected-files hook detects shell writes by pattern, such as a redirect, `sed -i`, `tee`, `rm`, `mv`, `cp`, `truncate`, `git mv`, `git rm` or `perl -i` next to a protected path. It fired several times on commands that only mentioned a protected path while writing another file; the agent then used the Edit or Write tool. A write that never names the path is not detected; the hashes in `scripts/guardrails.sh` catch the change afterwards.
 - Banned patterns and the extra pattern scan are regular expressions over source text; they do not understand code.
 - The sanitation run cannot see members generated by Lombok; an unused generated constructor was found by review, not by a tool (step 4).
 - Mutation testing covers the domain and application code; adapters and configuration are covered by integration tests only.

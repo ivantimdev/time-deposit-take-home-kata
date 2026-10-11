@@ -6,8 +6,8 @@ their work independently, have it reviewed by a fresh agent, and stop for the de
 approval after every step. The developer is present and reads every gate summary.
 
 Read `AGENTS.md` (imports the rules), `docs/ASSIGNMENT.md`, and `prompts/reports/00-harness.md`
-first. The step prompts are `prompts/NN-*.md`; a private pattern file is passed to the guard
-rails as `GUARDRAILS_EXTRA_PATTERNS`. Everything under `prompts/` is git-ignored and must stay so.
+first. The step prompts are `prompts/NN-*.md`; an optional extra pattern file can be passed to the
+guard rails as `GUARDRAILS_EXTRA_PATTERNS`. Everything under `prompts/` is git-ignored and must stay so.
 
 ## Steps
 
@@ -20,7 +20,7 @@ rails as `GUARDRAILS_EXTRA_PATTERNS`. Everything under `prompts/` is git-ignored
 | 5 | `05-api.md` | `feat(api)`, `build(api)`, `feat(api)`, `test(api)`, `chore(ai)` | contract has exactly 2 operations; Spectral green |
 | 6 | `06-docker.md` | `build(config)` ×2, `docs(repo)` | compose up → both endpoints answer → down |
 | 7 | `07-ci.md` | `ci(repo)` ×2, `docs(repo)` | latest GitHub run green; image visible in GHCR |
-| 8 | `08-docs.md` | `docs(repo)` ×5 | extra-pattern scan on docs; every assumption referenced |
+| 8 | `08-docs.md` | `docs(repo)` ×5 | guard rails on docs; every assumption referenced |
 | 9 | `09-review.md` | none (report only); fix agent commits as needed | every commit builds (`rebase -x`) |
 
 Exact messages are given in each step prompt; a prompt may mark a commit optional or allow
@@ -40,12 +40,7 @@ Start with the pre-flight, then step 1, unless the developer names another step.
 ## Pre-flight (once, before step 1)
 
 1. `git status --porcelain` empty; `git log --oneline -1` noted as the start.
-2. `GUARDRAILS_EXTRA_PATTERNS=<pattern file> scripts/guardrails.sh`. Step 0 was
-   written before the pattern file existed, so expect hits in `AGENTS.md` and
-   `.claude/skills/extend/SKILL.md`. For each hit, start a small fix agent:
-   reword to neutral project language ("a later requirement", "a future change"), one commit
-   `chore(ai): remove process wording from instructions and skills`. Re-run until green.
-3. Confirm tooling for the upcoming steps when you reach them: Docker daemon running
+2. Confirm tooling for the upcoming steps when you reach them: Docker daemon running
    (`docker info`) before step 4; `node --version` ≥ 18 before step 5; `gh auth status` and
    `docker info` before step 7. If missing, stop and tell the developer what to start.
 

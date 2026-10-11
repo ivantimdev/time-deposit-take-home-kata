@@ -4,8 +4,8 @@ One section per step: the commits, the gate outcome, and the fix rounds.
 The prompts are in [`prompts/`](prompts/README.md).
 
 From step 1 on, every step went through the same gate, run by the orchestrator and not by the step agent:
-clean tree; expected commit prefixes; `TimeDeposit.java` unchanged; `./mvnw spotless:check verify`; sanitation dry run; `scripts/guardrails.sh` with an extra pattern scan; mutation run at the thresholds; frozen tests unchanged; Failsafe reports present (from step 4); the step's own verification list; the step report.
-A fresh review agent then ran `/review` on the step's diff, and the developer decided on each finding.
+clean tree; expected commit prefixes; `TimeDeposit.java` unchanged; `./mvnw spotless:check verify`; sanitation dry run; `scripts/guardrails.sh`; mutation run at the thresholds; frozen tests unchanged; Failsafe reports present (from step 4); the step's own verification list; the step report.
+A fresh review agent then ran `/review` on the step's diff (every first round and some fix rounds), and the developer decided on each finding.
 From step 3 on, the developer allowed one fix round per step for minor findings; minor findings not selected are tracked for the final review (step 9).
 
 ## Before step 0
@@ -38,11 +38,6 @@ Fix rounds: one fix-forward and two follow-up rounds.
 - `a287313`: google-java-format 1.37.0 needs Java 21; Spotless on JDK 17 allows at most 1.28.0. The build had looked green only because every existing file was excluded from formatting.
 - Follow-up 1 (`da446f8`, `bc97104`, `9ce0e1a`): the composite sanitation recipe contained a recipe that would have changed the calculator's rounding, so it was replaced by an explicit list of 14 recipes; the guard rails script documents its commit-message base; the architecture map states the `@Transactional` exception.
 - Follow-up 2 (`a067a05`): a misspelled recipe name was skipped silently; the sanitation run now fails on it.
-
-## Pre-flight
-
-Commit: `6db9c12 chore(ai): remove process wording from instructions and skills`.
-The extra pattern scan found three lines in `AGENTS.md`, `.claude/skills/extend/SKILL.md` and `.claude/rules/git.md`; they were reworded and the scan passed.
 
 ## Step 1 — characterization tests
 
@@ -164,7 +159,24 @@ Fix rounds: 1.
 
 ## Step 8 — documentation
 
-The commits of this step are the `docs(repo)` commits after `e49368e` (`git log --oneline e49368e..`).
+Commits, round 1:
+
+- `a73159c docs(repo): describe the architecture and design decisions`
+- `6b6c1fb docs(repo): finalize the assumptions register`
+- `a1a0ce0 docs(repo): publish the agent prompts and the workflow log`
+- `c383e2c docs(repo): add the published prompts hidden by the ignore rule`
+- `98c5cb3 docs(repo): complete the readme`
+- `25a9a00 docs(repo): describe the ai-assisted development setup`
+
+`c383e2c` is a fix-forward: the ignore rule for the private `prompts/` directory also matched `docs/ai/prompts/`, so `a1a0ce0` held only this log.
+Two intermediate commits had a link that resolved only later: this log's link to the prompts at `a1a0ce0`, and the README's link to `docs/AI-DEVELOPMENT.md` at `98c5cb3`.
+`docs/AI-DEVELOPMENT.md` was committed last, after the developer confirmed the tool version, the models and the role statement.
+
+Gate: all checks PASS; docs-only diff; every relative link resolves; every assumption row cited in `java/src`; the compose run instructions re-executed.
+Review: 4 blocker, 3 major, minors selected by the developer.
+Fix rounds: 1.
+
+- Round 2 (`84e5c6c chore(ai): describe rule families without naming one`, then `docs(repo): correct the published prompts and the development docs`): the rules, the `/extend` skill and the published prompts no longer name rule families or plans the assignment does not define; the note on how the prompts were published made exact; exact wording on when the branch was pushed and which rounds had a review agent; the lock test stated as a repeatable experiment; replay instructions; factual corrections in the architecture, development and README pages.
 
 ## Step 9 — final review
 

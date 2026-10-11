@@ -37,7 +37,7 @@ API: package `org.ikigaidigital`, public no-arg constructor, `updateBalance(List
   ```
   and `Optional<Plan> planFor(String planTypeCode)` (via `PlanType.fromCode`). The global
   "no interest in the first 30 days" guard of the original becomes each plan's earning
-  period — same behaviour, but a future plan can start earning on another day.
+  period — same behaviour, so each plan states its own first earning day.
 
 `TimeDepositCalculator` (same package, same public API):
 - field `PlanCatalog plans`; `public TimeDepositCalculator()` → `this(PlanCatalog.standard())`;

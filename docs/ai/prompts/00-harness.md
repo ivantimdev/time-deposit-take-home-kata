@@ -265,13 +265,13 @@ In `java/pom.xml` (keep Java 17; keep groupId/artifactId/version):
   (7) tests assert behaviour, not implementation. Output: findings table
   `severity | file:line | finding | suggested fix`, no code changes.
 - **extend** (used for every new requirement): (1) restate the requirement
-  as one business rule in the README's vocabulary and name the rule family (interest,
-  lifecycle, persistence, API); (2) list which hard constraints it touches; (3) **design
+  as one business rule in the README's vocabulary and name the rule family (for
+  example interest, persistence or API, or a new rule family); (2) list which hard constraints it touches; (3) **design
   gate** — if it adds a rule family, changes a documented assumption or has more than one
   reasonable placement, present at least two designs with trade-offs and **stop for the
   developer's choice**; (4) list files to change in order: production → tests → migration /
   seed / contract → docs/assumptions; (5) implement; (6) `/verify`; never weaken a frozen
-  test; (7) `/commit`. Written generically: do not name any hypothetical future plan.
+  test; (7) `/commit`. Do not name plans the assignment does not define.
 
 ### Commit 9 — `chore(ai): add hook denying edits to protected files`
 - `.claude/protected-files.txt` — one repo-relative path per line, `#` comments allowed:
@@ -347,7 +347,7 @@ In `java/pom.xml` (keep Java 17; keep groupId/artifactId/version):
      has a row `| A<n> |` in `docs/ASSUMPTIONS.md` (FAIL otherwise); every row id that
      is referenced nowhere in `java/src` is printed as `WARN unreferenced A<n>` (not a
      failure — the review step decides).
-  8. **Extra patterns (private)**: if `GUARDRAILS_EXTRA_PATTERNS` points to a readable
+  8. **Extra patterns (optional)**: if `GUARDRAILS_EXTRA_PATTERNS` points to a readable
      file, grep all tracked files (`git ls-files`) with its regexes; any hit fails. Not
      set in CI; the developer sets it locally.
   Make the script executable; add a 5-line usage header.
@@ -405,7 +405,7 @@ A commit message is **exactly one line**:
 
    | scope | covers |
    |---|---|
-   | `domain` | `TimeDeposit`, `TimeDepositCalculator`, plans, interest and lifecycle rules |
+   | `domain` | `TimeDeposit`, `TimeDepositCalculator`, plans and interest rules |
    | `app` | use cases / application services and ports |
    | `api` | OpenAPI contract and REST adapter |
    | `persistence` | JPA entities, repositories, persistence adapter |

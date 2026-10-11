@@ -18,5 +18,5 @@ What happened in each step is in [`../WORKFLOW-LOG.md`](../WORKFLOW-LOG.md).
 | [`08-docs.md`](08-docs.md) | Architecture, assumptions, AI-assisted development, these prompts and the final README. |
 | [`09-review.md`](09-review.md) | Independent final review against the assignment, then fixes. |
 
-The prompts are published as they were run, except that a few sentences were reworded neutrally; no instruction was added or removed.
+Some sentences were reworded or shortened for publication.
 Paths under `prompts/` point to the private, git-ignored directory where the originals and the step reports live; they are not part of the repository.

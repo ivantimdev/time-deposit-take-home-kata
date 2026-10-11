@@ -158,7 +158,7 @@ Setup and what the harness caught: [docs/AI-DEVELOPMENT.md](docs/AI-DEVELOPMENT.
 │       ├── main/java/org/ikigaidigital/
 │       │   ├── (root)                    TimeDeposit, TimeDepositCalculator, TimeDepositApplication
 │       │   ├── domain/                   Withdrawal, TimeDepositDetails
-│       │   │   └── plan/                 PlanType, Plan, InterestPolicy, AnnualRate, EarningPeriod, PlanCatalog
+│       │   │   └── plan/                 PlanType, Plan, InterestPolicy, FixedRateInterest, AnnualRate, EarningPeriod, PlanCatalog
 │       │   ├── application/port/in/      use-case interfaces
 │       │   ├── application/port/out/     TimeDepositRepository
 │       │   ├── application/service/      use-case implementations

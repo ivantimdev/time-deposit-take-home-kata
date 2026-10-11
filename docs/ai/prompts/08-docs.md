@@ -8,7 +8,7 @@ the orchestrator; (2) whether the role statement below is accurate or how to cha
 
 Writing rules: plain, short sentences; no superlatives, no "robust/seamless/leverage"; a
 reader should be able to verify every claim in the repository. Nothing about other
-solutions or requirements the assignment does not state (the extra-pattern scan runs on this step).
+solutions or requirements the assignment does not state.
 
 ## `docs/ARCHITECTURE.md`
 
@@ -74,8 +74,7 @@ rail is adjusted in the same commit, with the developer's agreement — ask).
 ## `docs/ai/prompts/`
 
 Copy `prompts/orchestrator.md` and `prompts/00-…` to `prompts/09-…` as published prompts,
-plus `README.md` indexing them with one line each. Do not copy `prompts/reports/` or
-the private pattern file. Then `docs/ai/WORKFLOW-LOG.md`: one section per step with the
+plus `README.md` indexing them with one line each. Do not copy `prompts/reports/`. Then `docs/ai/WORKFLOW-LOG.md`: one section per step with the
 commits (hash + message), the gate outcome, the number of fix rounds and what they fixed —
 condensed from `prompts/reports/*.md` and `orchestrator.md` (facts, no narrative).
 

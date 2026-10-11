@@ -76,7 +76,7 @@ The full rules are in [`.claude/rules/architecture.md`](../.claude/rules/archite
 ### `POST /api/v1/time-deposits/update-balances`
 
 1. `TimeDepositsController.updateBalances` calls `UpdateBalancesUseCase`; `UpdateBalancesService` opens a read-write transaction.
-2. The adapter loads all deposits ordered by `id` with a pessimistic write lock (`SELECT … FOR NO KEY UPDATE` on PostgreSQL); the rows stay locked until the transaction ends (ASSUMPTION A10).
+2. The adapter loads all deposits ordered by `id` with a row lock (`PESSIMISTIC_WRITE`); the rows stay locked until the transaction ends (ASSUMPTION A10).
 3. `TimeDepositCalculator.updateBalance` credits one month of interest to each deposit, as the original did (ASSUMPTION A7).
 4. The adapter writes only the `balance` column of each deposit, then reads all deposits with their withdrawals in the same transaction.
 5. The transaction commits, which releases the locks, and the controller answers `200` with the updated deposits (ASSUMPTION A8).
@@ -107,8 +107,8 @@ These files change, and no others:
 
 1. [`PlanType.java`](../java/src/main/java/org/ikigaidigital/domain/plan/PlanType.java): a new constant with its code.
 2. [`PlanCatalog.java`](../java/src/main/java/org/ikigaidigital/domain/plan/PlanCatalog.java): a new entry in `standard()` with its rate and earning period.
-3. A new migration in [`db/migration/`](../java/src/main/resources/db/migration/) that replaces the `plan_type` CHECK constraint with one that admits the new code (ASSUMPTION A12).
-4. [`openapi.yaml`](../java/src/main/resources/openapi/openapi.yaml): the code added to the `planType` enum; the generated model follows.
+3. A new migration in [`db/migration/`](../java/src/main/resources/db/migration/) that drops the `plan_type` CHECK constraint and adds one that admits the new code (ASSUMPTION A12). V1 declares the constraint inline without a name, so PostgreSQL generated the name `time_deposits_plan_type_check`.
+4. [`openapi.yaml`](../java/src/main/resources/openapi/openapi.yaml): the code added to the `planType` enum; the generated model follows. No test ties this enum to `PlanType`, so this step is easy to miss.
 5. Tests: `PlanTypeTest` and `PlanCatalogTest` for the new constant and entry, a new calculator test class with literal expectations (the characterization tests are frozen), and a persistence test that the constraint accepts the code.
 
 Apart from documentation (a row in `docs/ASSUMPTIONS.md` when the new plan's rule needs a reading), nothing else changes: the controller, the mappers, the converter, the use cases and the calculator stay as they are.
@@ -137,7 +137,7 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 
 - The update runs in one transaction: lock all deposits, calculate, save, read back.
 - The pessimistic lock serialises concurrent updates, so none is lost and none is applied twice.
-  `TimeDepositsApiIT` sends five concurrent `POST`s and expects the balances of five sequential updates; with the lock removed, the same test lost four of the five updates.
+  `TimeDepositsApiIT` sends five concurrent `POST`s and expects the balances of five sequential updates; removing `@Lock` from `TimeDepositJpaRepository.findAllForUpdate` makes this test fail.
 - `POST` is not idempotent: every call credits one more month (ASSUMPTION A8, A17).
 - Not built: running the update on a monthly schedule safely.
   That would need a record of which month each deposit was last credited for, so that a retried or doubled run credits nothing.
@@ -164,4 +164,4 @@ No such field exists today, on purpose: without a requirement that reads it, it 
 | OpenRewrite | Dead code and static analysis findings; any finding fails. Recipes in [`java/rewrite.yml`](../java/rewrite.yml). | `cd java && ./mvnw -Psanitize rewrite:dryRun` |
 | Spotless | google-java-format formatting. | `cd java && ./mvnw spotless:check` |
 | Spectral | The contract against `spectral:oas` and the rules in [`.spectral.yaml`](../.spectral.yaml); warnings fail. | `npx -y @stoplight/spectral-cli@6 lint --fail-severity=warn java/src/main/resources/openapi/openapi.yaml` |
-| Guard rails | Protected files, commit messages, exactly two operations, banned patterns, assumption references. | `scripts/guardrails.sh` |
+| Guard rails | Protected-file hashes, commit messages, exactly two operations, no hand-written mappings, banned patterns, no embedded database, assumption references. | `scripts/guardrails.sh` |
