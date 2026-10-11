@@ -30,7 +30,8 @@ class EarningPeriodTest {
   @Test
   void periodAfterTheLargestDayIsRejected() {
     assertThatThrownBy(() -> EarningPeriod.after(Integer.MAX_VALUE))
-        .isInstanceOf(ArithmeticException.class);
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("2147483647");
   }
 
   @ParameterizedTest(name = "day {0} -> {1}")

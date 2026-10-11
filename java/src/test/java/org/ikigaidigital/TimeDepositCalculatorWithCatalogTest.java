@@ -23,20 +23,19 @@ class TimeDepositCalculatorWithCatalogTest {
                   PlanType.BASIC,
                   new FixedRateInterest(new AnnualRate(0.12), EarningPeriod.from(1)))));
 
-  @ParameterizedTest(name = "{0} {1} at {2} days -> {3}")
+  @ParameterizedTest(name = "basic {0} at {1} days -> {2}")
   @CsvSource(
       textBlock =
           """
-          basic,   1000.0,    0,   1000.0
-          basic,   1000.0,    1,   1010.0
-          basic,   1000.0,    30,  1010.0
-          basic,   1234567.0, 31,  1246912.67
-          basic,   18.0,      1,   18.18
-          basic,   0.04,      1,   0.04
+          1000.0,    0,  1000.0
+          1000.0,    1,  1010.0
+          1000.0,    30, 1010.0
+          1234567.0, 31, 1246912.67
+          18.0,      1,  18.18
+          0.04,      1,  0.04
           """)
-  void appliesThePlanOfTheGivenCatalogue(
-      String planType, double balance, int days, double expectedBalance) {
-    final TimeDeposit deposit = new TimeDeposit(1, planType, balance, days);
+  void appliesThePlanOfTheGivenCatalogue(double balance, int days, double expectedBalance) {
+    final TimeDeposit deposit = new TimeDeposit(1, "basic", balance, days);
 
     calculator.updateBalance(List.of(deposit));
 

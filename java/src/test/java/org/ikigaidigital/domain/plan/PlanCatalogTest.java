@@ -47,7 +47,7 @@ class PlanCatalogTest {
 
   @ParameterizedTest(name = "[{0}]")
   @ValueSource(strings = {"Basic", "gold"})
-  void standardHasNoPlanForAnUnknownCode(String code) {
+  void standardHasNoPlanForAnUnknownOrMiscasedCode(String code) {
     assertThat(standard.planFor(code)).isEmpty();
   }
 
