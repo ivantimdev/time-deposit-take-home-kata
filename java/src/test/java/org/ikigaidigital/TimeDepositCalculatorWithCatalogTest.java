@@ -9,6 +9,7 @@ import org.ikigaidigital.domain.plan.FixedRateInterest;
 import org.ikigaidigital.domain.plan.Plan;
 import org.ikigaidigital.domain.plan.PlanCatalog;
 import org.ikigaidigital.domain.plan.PlanType;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,6 +47,16 @@ class TimeDepositCalculatorWithCatalogTest {
   @ValueSource(strings = {"student", "premium"})
   void earnsNothingForAPlanTypeTheCatalogueDoesNotHold(String planType) {
     final TimeDeposit deposit = new TimeDeposit(1, planType, 1000.0, 100);
+
+    calculator.updateBalance(List.of(deposit));
+
+    assertThat(deposit.getBalance()).isEqualTo(1000.0);
+  }
+
+  // ASSUMPTION A6: a null plan type earns no interest; the original threw NullPointerException.
+  @Test
+  void leavesTheBalanceUnchangedWhenThePlanTypeIsNull() {
+    final TimeDeposit deposit = new TimeDeposit(1, null, 1000.0, 100);
 
     calculator.updateBalance(List.of(deposit));
 
