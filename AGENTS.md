@@ -82,3 +82,4 @@ Skills, in `.claude/skills/`:
 - `/commit` — verify, propose a conventional message, wait for approval, commit.
 - `/review` — independent review checklist producing a findings table.
 - `/extend` — add a new requirement through a design gate.
+- `/add-plan` — add a fixed-rate plan: the recipe of `docs/ARCHITECTURE.md` › Adding a plan, step by step.

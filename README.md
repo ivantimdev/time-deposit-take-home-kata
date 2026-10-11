@@ -138,7 +138,7 @@ and cited in the code as `// ASSUMPTION A<n>`.
 ## AI-assisted development
 
 The solution was built with Claude Code: one fresh agent per step, each running a written prompt, and no step started before the previous one was verified and approved by the developer.
-The agents work under [AGENTS.md](AGENTS.md), the rules in [.claude/rules/](.claude/rules/), four skills, a hook protecting frozen files, git hooks and [scripts/guardrails.sh](scripts/guardrails.sh); CI runs the same checks.
+The agents work under [AGENTS.md](AGENTS.md), the rules in [.claude/rules/](.claude/rules/), five skills, a hook protecting frozen files, git hooks and [scripts/guardrails.sh](scripts/guardrails.sh); CI runs the same checks.
 Setup and what the harness caught: [docs/AI-DEVELOPMENT.md](docs/AI-DEVELOPMENT.md); prompts: [docs/ai/prompts/](docs/ai/prompts/README.md); step log: [docs/ai/WORKFLOW-LOG.md](docs/ai/WORKFLOW-LOG.md).
 
 ## Repository layout
@@ -182,3 +182,4 @@ Setup and what the harness caught: [docs/AI-DEVELOPMENT.md](docs/AI-DEVELOPMENT.
 | Guard rails | `scripts/guardrails.sh` |
 | CI | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the same checks on every push; on every push to `main` and on `v*` tags it also publishes the service image to GitHub Packages, a build artefact that no run instruction depends on |
 | Add a new requirement | `/extend` in Claude Code: restate it, pass a design gate, implement, verify, commit |
+| Add a fixed-rate plan | `/add-plan` in Claude Code: the recipe of [Architecture › Adding a plan](docs/ARCHITECTURE.md#adding-a-plan), step by step; anything beyond a rate and a period goes through `/extend` |

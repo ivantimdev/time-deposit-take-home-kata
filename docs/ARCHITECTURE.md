@@ -115,6 +115,7 @@ These files change, and no others:
 5. Tests: `PlanTypeTest` and `PlanCatalogTest` for the new constant and entry, a new calculator test class with literal expectations (the characterization tests are frozen), a persistence test that the constraint accepts the code, and `PlanTypeContractTest` passing again.
 
 Apart from documentation (a row in `docs/ASSUMPTIONS.md` when the new plan's rule needs a reading), nothing else changes: the controller, the mappers, the converter, the use cases and the calculator stay as they are.
+The [`/add-plan`](../.claude/skills/add-plan/SKILL.md) skill is the executable form of this list; a plan whose rule is more than a rate over a period goes through `/extend` instead.
 
 ### Adding a rule family
 

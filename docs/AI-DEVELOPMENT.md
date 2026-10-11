@@ -15,7 +15,7 @@ Every file named here is in the repository.
 | [`CLAUDE.md`](../CLAUDE.md) | Entry point Claude Code loads; it imports `AGENTS.md`. |
 | [`AGENTS.md`](../AGENTS.md) | Hard constraints, architecture map, workflow, definition of done. |
 | [`.claude/rules/`](../.claude/rules/) | Architecture, Java style, Spring, testing and commit rules, loaded automatically. |
-| [`.claude/skills/`](../.claude/skills/) | `/verify`, `/commit`, `/review`, `/extend`. |
+| [`.claude/skills/`](../.claude/skills/) | `/verify`, `/commit`, `/review`, `/extend`, `/add-plan`. |
 | [`.claude/settings.json`](../.claude/settings.json) | Allowed and denied commands (no force-push, amend, rebase or hard reset); registers the hook. |
 | [`.claude/hooks/protect-files.sh`](../.claude/hooks/protect-files.sh) | Blocks edits to the files in [`.claude/protected-files.txt`](../.claude/protected-files.txt). |
 | [`.githooks/`](../.githooks/) | `commit-msg` enforces the one-line commit convention; `pre-commit` checks formatting of staged Java files. |
@@ -67,7 +67,7 @@ sequenceDiagram
 
 - Agent instructions: [`AGENTS.md`](../AGENTS.md), imported by [`CLAUDE.md`](../CLAUDE.md).
 - Rules: [`architecture.md`](../.claude/rules/architecture.md), [`java-style.md`](../.claude/rules/java-style.md), [`spring.md`](../.claude/rules/spring.md), [`testing.md`](../.claude/rules/testing.md), [`git.md`](../.claude/rules/git.md).
-- Skills: [`/verify`](../.claude/skills/verify/SKILL.md), [`/commit`](../.claude/skills/commit/SKILL.md), [`/review`](../.claude/skills/review/SKILL.md), [`/extend`](../.claude/skills/extend/SKILL.md).
+- Skills: [`/verify`](../.claude/skills/verify/SKILL.md), [`/commit`](../.claude/skills/commit/SKILL.md), [`/review`](../.claude/skills/review/SKILL.md), [`/extend`](../.claude/skills/extend/SKILL.md), [`/add-plan`](../.claude/skills/add-plan/SKILL.md).
 - Hook and settings: [`protect-files.sh`](../.claude/hooks/protect-files.sh), [`protected-files.txt`](../.claude/protected-files.txt), [`settings.json`](../.claude/settings.json).
 - Guard rails: [`guardrails.sh`](../scripts/guardrails.sh), [`banned-patterns.txt`](../scripts/banned-patterns.txt), [`protected-files.sha256`](../scripts/protected-files.sha256), [`guardrails-exclude.txt`](../scripts/guardrails-exclude.txt).
 - Git hooks: [`commit-msg`](../.githooks/commit-msg), [`pre-commit`](../.githooks/pre-commit).
