@@ -19,9 +19,6 @@ services:
 
   app:
     build: ./java
-    # To run the published image instead of building it, replace the build line with:
-    # image: ghcr.io/ivantimdev/time-deposit-kata:latest
-    # platform: linux/amd64
     ports:
       - "8080:8080"
     environment:
