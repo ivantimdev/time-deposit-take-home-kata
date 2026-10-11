@@ -249,9 +249,9 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "/webjars/swagger-ui/swagger-ui.css",
-        "/webjars/swagger-ui/swagger-ui-bundle.js",
-        "/webjars/swagger-ui/swagger-ui-standalone-preset.js"
+        "/swagger-ui/swagger-ui.css",
+        "/swagger-ui/swagger-ui-bundle.js",
+        "/swagger-ui/swagger-ui-standalone-preset.js"
       })
   void servesTheFilesSwaggerUiLoads(String path) {
     assertThat(http.getForEntity(path, String.class).getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -259,7 +259,15 @@ class TimeDepositsApiIT extends PostgresContainerSupport {
 
   // ASSUMPTION A1: nothing but the two operations and their documentation answers.
   @ParameterizedTest
-  @ValueSource(strings = {"/api/v1/time-deposits/1", "/actuator/health", "/v3/api-docs"})
+  @ValueSource(
+      strings = {
+        "/api/v1/time-deposits/1",
+        "/actuator/health",
+        "/v3/api-docs",
+        "/webjars/swagger-ui/index.html",
+        "/webjars/swagger-ui/swagger-initializer.js",
+        "/swagger-ui/oauth2-redirect.html"
+      })
   void answersNotFoundBeyondTheTwoEndpoints(String path) {
     assertThat(http.getForEntity(path, String.class).getStatusCode())
         .isEqualTo(HttpStatus.NOT_FOUND);
