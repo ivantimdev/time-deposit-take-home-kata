@@ -58,7 +58,7 @@ Dependency rule: `adapter.*` → `application` → `domain`; `config` → everyt
 A task, step or later change is finished only when all of the following hold at `HEAD`:
 
 - every planned commit exists and each was committed only after a green `./mvnw -q verify`, so every commit in history builds and passes;
-- `/verify` is fully green: Spotless check, build, unit and integration tests, sanitation dry run, `scripts/guardrails.sh`;
+- `/verify` is fully green: Spotless check, build, unit and integration tests, contract lint (Spectral), sanitation dry run, `scripts/guardrails.sh`;
 - no test was deleted, weakened, `@Disabled` or had its expected values changed to make it pass; no coverage or mutation threshold was lowered;
 - once a CI workflow exists in `.github/workflows/`, the branch is pushed and the latest run for that commit is green (`gh run watch`, `gh run list`); fix forward with new commits until it is;
 - the report for the step is written.
