@@ -54,9 +54,10 @@ check_contract_operations() {
     return
   fi
   local count
-  # Without a YAML library the count accepts only plain block-mapping keys with one-line values and rejects
-  # every other spelling, so that no operation can hide from it. A counted line that is not an operation is
-  # caught by GeneratedApiInterfacesTest, which counts the operations with the build's own parser.
+  # Without a YAML library the count accepts only plain or quoted "/..." path keys, plain lowercase operation
+  # keys and values that close on their line or are block scalars, and rejects every other spelling, so that no
+  # operation can hide from it. A counted line that is not an operation is caught by GeneratedApiInterfacesTest,
+  # which counts the operations with the build's own parser.
   count=$(python3 - "$CONTRACT" <<'PY'
 import re
 import sys
@@ -77,6 +78,8 @@ def reject():
 
 
 def without_comment(raw):
+    # A "#" after whitespace and outside a quoted run starts the comment; a quote opens a run wherever it
+    # appears, which is stricter than YAML and can only lengthen a value, never hide a key.
     quote = None
     for index, char in enumerate(raw):
         if quote:
@@ -127,7 +130,7 @@ print(count)
 PY
 )
   [ "$count" != unreadable ] ||
-    fail contract-operations "$CONTRACT has a path item or operation the count cannot read; write them as block mappings with /... path keys, lowercase operation keys and one-line values (no anchors, aliases or tags)"
+    fail contract-operations "$CONTRACT has a path item or operation the count cannot read; write them as block mappings with /... path keys, lowercase operation keys and values that close on their line (no anchors, aliases or tags)"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
