@@ -54,10 +54,9 @@ check_contract_operations() {
     return
   fi
   local count
-  # Counts the HTTP methods directly under each path item without a YAML library, so it accepts only what it
-  # can read exactly: a path item is a plain or quoted "/..." key with nothing after the colon, an operation
-  # is a plain lowercase key. Any other spelling under paths could hide an operation and is rejected.
-  # TimeDepositsApiTest counts the same operations from the generated interface, with the build's own parser.
+  # Without a YAML library the count reads only the spellings it can read exactly and rejects every other one,
+  # so that no operation can be hidden from it. A counted line that is not an operation is caught by
+  # TimeDepositsApiTest, which counts the operations with the build's own parser.
   count=$(python3 - "$CONTRACT" <<'PY'
 import re
 import sys
@@ -101,15 +100,19 @@ with open(sys.argv[1]) as contract:
             found = operation.match(line)
             if not found:
                 reject()
-            if found.group(1) in methods:
-                if found.group(2).strip():
+            key, value = found.group(1), found.group(2).strip()
+            quoted = value[:1] in {'"', "'"}
+            if value[:1] in {"[", "{", "&", "*", "!"} or (quoted and not (len(value) > 1 and value.endswith(value[0]))):
+                reject()
+            if key in methods:
+                if value:
                     reject()
                 count += 1
 print(count)
 PY
 )
   [ "$count" != unreadable ] ||
-    fail contract-operations "$CONTRACT has a key under paths the count cannot read; use plain /... path keys and plain lowercase operation keys"
+    fail contract-operations "$CONTRACT has a path item or operation the count cannot read; write them as block mappings with /... path keys, lowercase operation keys and one-line values"
   [ "$count" -eq 2 ] || fail contract-operations "$CONTRACT declares $count operations (expected exactly 2)"
   pass contract-operations
 }
