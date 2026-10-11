@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 interface TimeDepositJpaRepository extends JpaRepository<TimeDepositEntity, Integer> {
 
-  // ASSUMPTION A10: SELECT ... FOR UPDATE holds the rows until the caller's transaction ends.
+  // ASSUMPTION A10: a row lock (PostgreSQL emits FOR NO KEY UPDATE) held until the caller's
+  // transaction ends; a concurrent update waits for it.
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select t from TimeDepositEntity t order by t.id")
   List<TimeDepositEntity> findAllForUpdate();

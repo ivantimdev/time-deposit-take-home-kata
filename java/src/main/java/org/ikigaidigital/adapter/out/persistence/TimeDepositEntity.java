@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +19,6 @@ import org.ikigaidigital.domain.plan.PlanType;
 @Table(name = "time_deposits")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 class TimeDepositEntity {
 
   @Id
@@ -34,7 +32,7 @@ class TimeDepositEntity {
   @Column(name = "days", nullable = false)
   private int days;
 
-  // The only column a balance update writes.
+  // The only value a balance update changes.
   @Setter
   @Column(name = "balance", nullable = false, precision = 19, scale = 2)
   private BigDecimal balance;
