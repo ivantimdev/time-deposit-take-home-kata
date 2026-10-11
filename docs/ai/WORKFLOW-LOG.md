@@ -211,3 +211,28 @@ Review, round 6, on the round-5 changes: 0 blocker, 0 major, 6 minor, all fixed:
 Review, round 7, on the round-6 changes: 0 blocker, 0 major, 3 minor, all wording, fixed: the guard rail's comment and message name the shapes it accepts; the comment-stripping helper states its simplification; this entry says which test was renamed.
 
 One commit of round 1, `da69464`, carries the message of the commit before it; it holds the configuration-class alignment and the removal of the default port. History is not rewritten, so the message stays.
+
+## Step 10 — final fixes
+
+A fresh agent closed the documentation gaps found in a final read, added one skill and two tests; no behaviour changed.
+Run with Fable 5.1 in Claude Code.
+
+Commits, each after a green `/verify`:
+
+- `d613929 docs(repo): state cadence, precision and transaction scope assumptions`
+- `a9e4585 docs(repo): document the local build as the only way to run`
+- `d108477 build(config): run only from the local image build`
+- `37f87ed docs(repo): cite the strengthened and new assumptions in code`
+- `a83b9d9 chore(ai): add the add-plan skill`
+- `eedf039 test(api): render large balances plainly and load the sample data`
+- this entry and the published step prompt, as the last `docs(repo)` commit
+
+The register: A7, A8 and A19 reworded, fact first; A21 (which balances survive the round trip through the frozen `Double`) and A22 (one transaction for all deposits) added and cited in code; a note that `days` never changes through this API.
+The architecture page gained the cadence paragraph and a "Scaling the update" section; the README no longer offers the registry image, which the pipeline still publishes as a build artefact.
+The `/add-plan` skill was proven before it was committed: on a throwaway branch an invented `flex` plan (2 %, from day 61) was added by following the skill literally, in two commits, with every check green and mutation 37/37; the branch was then deleted and nothing of it reached `main`.
+The proof changed the skill in two places: the docs step also names the sentence counting the plans, and the commit split is two commits rather than three, because `PlanTypeContractTest` ties the enum to the contract and the converter ties the persistence test to the enum.
+Tests: `TimeDepositsApiIT.rendersALargeBalanceInPlainDecimalNotation`, and `SampleDataIT` (four tests, the `local` profile, its own database on the shared container because the seed is a repeatable migration recorded in Flyway's history).
+After the step: 241 unit and 67 integration tests, 0 failures; mutation 37/37, line coverage 81/81; the Compose run reproduces the README's balances.
+
+Pushed by the step agent after a green `/verify`; the CI run is recorded in the private step report.
+Deviation: the four `docker pull` or `docker login` mentions left under `docs/` are in the published prompts of steps 7 and 9, kept as the record of what ran.

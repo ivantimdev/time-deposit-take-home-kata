@@ -17,6 +17,7 @@ What happened in each step is in [`../WORKFLOW-LOG.md`](../WORKFLOW-LOG.md).
 | [`07-ci.md`](07-ci.md) | GitHub Actions running every check, and the container image published to GitHub Packages. |
 | [`08-docs.md`](08-docs.md) | Architecture, assumptions, AI-assisted development, these prompts and the final README. |
 | [`09-review.md`](09-review.md) | Independent final review against the assignment, then fixes. |
+| [`10-final-fixes.md`](10-final-fixes.md) | Assumptions strengthened and added, the scaling note, the `/add-plan` skill proven on a throwaway branch, and two tests. |
 
 Some sentences were reworded or shortened for publication.
 Paths under `prompts/` point to the private, git-ignored directory where the originals and the step reports live; they are not part of the repository.
