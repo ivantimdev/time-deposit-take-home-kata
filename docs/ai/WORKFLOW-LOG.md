@@ -180,12 +180,12 @@ Fix rounds: 1.
 
 ## Step 9 — final review
 
-A fresh agent reviewed the whole repository against the assignment, the hard constraints and the rules, with the minor findings deferred from steps 1 to 8 as extra input, and then fixed what the developer selected, in rounds: each round of fixes was re-checked and reviewed again by a fresh agent until nothing remained.
+A fresh agent reviewed the whole repository against the assignment, the hard constraints and the rules, with the minor findings deferred from steps 1 to 8 as extra input, and then fixed what the developer selected, in rounds: each round of fixes was re-checked and reviewed again by a fresh agent until a round yielded no fix.
 Run with Fable 5.1 in Claude Code.
 
 Checks before the review, all green: the frozen files unchanged; every one of the 83 commits since the fork point builds and passes its unit tests; 235 unit and 66 integration tests; mutation 38/38 at 100 % line coverage; sanitation, Spectral and the guard rails; the Compose run reproduces the README's balances; a plain-Java consumer of `TimeDepositCalculator`, with no Spring on the classpath, prints `1235595.81`.
 
-Review, round 1: 0 blocker, 11 major, 31 minor. The developer marked everything fixable as fix; 6 minors stay as they are (fixture arithmetic and class-name strings in the frozen tests, commit types in published history, a private step report, the amd64-only image, and a reading already closed).
+Review, round 1: 0 blocker, 11 major, 31 minor. The developer marked everything fixable as fix; 6 minors stay as they are (fixture arithmetic and class-name strings in the frozen tests, commit types in published history, the amd64-only image, a null plan type pinned through a custom catalogue only, and a reading already closed).
 
 Fixed, round 1 (`1c397ca` to `383388b`):
 
@@ -196,7 +196,10 @@ Fixed, round 1 (`1c397ca` to `383388b`):
 - Names and tests: the generated response models no longer share the domain classes' names; two persistence tests that asserted configuration rather than behaviour and a timing log in the endpoint test are gone; a test ties the contract's `planType` enum to `PlanType`; the withdrawals index is the foreign key alone.
 - Docs: `docs/REQUIREMENTS.md` traces every requirement to code and proof; the architecture page states why the thresholds are 100 %, where Lombok is allowed and why the original README moved; the published step-9 prompt is the one that ran; Node 22 in CI.
 
-Review, round 2, on the round-1 changes: 0 blocker, 3 major, 8 minor. Fixed (`f98d020` to `8dfa01c` and this log): the operation counter handles quoted path keys and rejects `$ref` path items; the architecture page no longer says the contract enum is untested; this section; the lock comment names Hibernate as the renderer; the endpoint test says "five updates" once and drops a path that hard-coded the Swagger UI version; the migration-history test joins the two deleted earlier; `EarningPeriod.after(0)` replaces a repeated sentinel; the Node release is named where the lint runs.
+Review, round 2, on the round-1 changes: 0 blocker, 3 major, 8 minor. Fixed (`f98d020` to `07c7773`): the operation counter handles quoted path keys and rejects `$ref` path items; the architecture page no longer says the contract enum is untested; this section; the lock comment names Hibernate as the renderer; the endpoint test drops a path that hard-coded the Swagger UI version; the migration-history test joins the two deleted earlier; `EarningPeriod.after(0)` replaces a repeated sentinel; the Node release is named where the lint runs.
 Rejected, with reason: the round-1 commits group several small changes per scope, which is the fix-round rule of this project (one commit per scope per round).
+
+Review, round 3, on the round-2 changes: 1 blocker, 1 major, 6 minor. Fixed: the operation counter also rejects flow mappings, aliases and anchors under `paths`, which hid operations from the count (blocker); the endpoint tests that recomputed their expectations with the calculator are gone, every balance is a literal from the original (major); the lock comment says why `FOR NO KEY UPDATE` is the right lock; "five updates" is one literal; the Node wording says what works and what CI runs; this section names the finding instead of a file outside the repository.
+Kept, with reason: `indexesWithdrawalsByDeposit` asserts the index A14 decided on, a schema decision rather than a framework setting.
 
 One commit of round 1, `da69464`, carries the message of the commit before it; it holds the configuration-class alignment and the removal of the default port. History is not rewritten, so the message stays.
