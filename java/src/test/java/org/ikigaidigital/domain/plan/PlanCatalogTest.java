@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class PlanCatalogTest {
@@ -36,6 +37,12 @@ class PlanCatalogTest {
             new Plan(
                 PlanType.PREMIUM,
                 new FixedRateInterest(new AnnualRate(0.05), EarningPeriod.after(45))));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @EnumSource(PlanType.class)
+  void standardHasAPlanForEveryPlanType(PlanType type) {
+    assertThat(standard.planFor(type.code())).map(Plan::type).contains(type);
   }
 
   @ParameterizedTest(name = "[{0}]")

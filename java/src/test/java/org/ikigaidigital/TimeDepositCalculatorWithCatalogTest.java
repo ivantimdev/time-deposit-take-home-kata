@@ -11,6 +11,7 @@ import org.ikigaidigital.domain.plan.PlanCatalog;
 import org.ikigaidigital.domain.plan.PlanType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TimeDepositCalculatorWithCatalogTest {
 
@@ -31,15 +32,23 @@ class TimeDepositCalculatorWithCatalogTest {
           basic,   1234567.0, 31,  1246912.67
           basic,   18.0,      1,   18.18
           basic,   0.04,      1,   0.04
-          student, 1000.0,    100, 1000.0
-          premium, 1000.0,    100, 1000.0
           """)
-  void appliesOnlyThePlansOfTheGivenCatalogue(
+  void appliesThePlanOfTheGivenCatalogue(
       String planType, double balance, int days, double expectedBalance) {
     final TimeDeposit deposit = new TimeDeposit(1, planType, balance, days);
 
     calculator.updateBalance(List.of(deposit));
 
     assertThat(deposit.getBalance()).isEqualTo(expectedBalance);
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @ValueSource(strings = {"student", "premium"})
+  void earnsNothingForAPlanTypeTheCatalogueDoesNotHold(String planType) {
+    final TimeDeposit deposit = new TimeDeposit(1, planType, 1000.0, 100);
+
+    calculator.updateBalance(List.of(deposit));
+
+    assertThat(deposit.getBalance()).isEqualTo(1000.0);
   }
 }
