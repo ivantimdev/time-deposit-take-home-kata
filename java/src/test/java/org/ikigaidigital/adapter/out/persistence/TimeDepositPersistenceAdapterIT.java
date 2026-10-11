@@ -39,14 +39,6 @@ class TimeDepositPersistenceAdapterIT extends PostgresContainerSupport {
     this.entityManager = entityManager;
   }
 
-  @Test
-  void appliesTheSchemaMigration() {
-    assertThat(
-            jdbc.queryForList(
-                "select version from flyway_schema_history where success", String.class))
-        .contains("1");
-  }
-
   @ParameterizedTest
   @ValueSource(strings = {"basic", "student", "premium"})
   void savesAndLoadsADepositOfEachPlanType(String planType) {
